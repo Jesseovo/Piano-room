@@ -1,0 +1,75 @@
+/* 全局过渡动画样式 */
+
+/* 页面切换动画 - 滑动淡入淡出 */
+.fade-transform-leave-active,
+.fade-transform-enter-active {
+  transition: all 0.5s;
+}
+
+.fade-transform-enter {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.fade-transform-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+/* 简单淡入淡出 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* 缩放过渡 */
+.scale-enter-active,
+.scale-leave-active {
+  transition: all 0.5s;
+}
+
+.scale-enter,
+.scale-leave-to {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+/* 滑动过渡 */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.5s;
+}
+
+.slide-up-enter {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(-30px);
+}
+
+/* 弹跳过渡 */
+.bounce-enter-active {
+  animation: bounce-in 0.5s;
+}
+.bounce-leave-active {
+  animation: bounce-in 0.5s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+} 

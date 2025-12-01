@@ -1,0 +1,24 @@
+<update id="update" parameterType="com.bookingsystem.pojo.User">
+    UPDATE users
+    <set>
+        <if test="password != null and password != ''">
+            password = #{password},
+        </if>
+        <if test="realName != null and realName != ''">
+            real_name = #{realName},
+        </if>
+        <if test="avatarUrl != null and avatarUrl != ''">
+            avatar_url = #{avatarUrl},
+        </if>
+        <if test="studentId != null and studentId != ''">
+            student_id = #{studentId},
+        </if>
+        <if test="email != null and email != ''">
+            email = #{email},
+        </if>
+        <if test="phone != null and phone != ''">
+            phone = #{phone},
+        </if>
+    </set>
+    WHERE id = #{id}
+</update> 
