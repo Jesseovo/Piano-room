@@ -1,0 +1,31 @@
+# 日志文件
+*.log
+*.log.*
+logs/
+
+# 构建产物
+target/
+node_modules/
+dist/
+dist-ssr/
+
+# Nginx 运行时 & 构建产物
+nginx-1.28.0/logs/
+nginx-1.28.0/html/
+
+# IDE / 编辑器
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# 临时文件
+*.local
+*.iml
+*.iws
+*.ipr
