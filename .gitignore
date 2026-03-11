@@ -9,9 +9,11 @@ node_modules/
 dist/
 dist-ssr/
 
-# Nginx 运行时 & 构建产物
+# Nginx 运行时目录 & 二进制（只保留 conf/ contrib/ docs/）
 nginx-1.28.0/logs/
 nginx-1.28.0/html/
+nginx-1.28.0/temp/
+nginx-1.28.0/nginx.exe
 
 # IDE / 编辑器
 .idea/
