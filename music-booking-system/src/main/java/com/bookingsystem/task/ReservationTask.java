@@ -37,6 +37,11 @@ public class ReservationTask {
         for (Reservation r : completedList) {
             // 仅当已签到才标为 completed，否则标为 occupied（违约）
             if (r.getSignStartTime() != null) {
+                // 如果已签到但未签退，自动设置签退时间为预约结束时间
+                if (r.getSignEndTime() == null) {
+                    r.setSignEndTime(r.getEndTime());
+                    log.info("[定时任务] 预约 {} 自动签退（预约时间结束）", r.getId());
+                }
                 r.setStatus("completed");
                 reservationMapper.update(r);
                 log.info("[定时任务] 预约 {} 已完成（已签到）", r.getId());
