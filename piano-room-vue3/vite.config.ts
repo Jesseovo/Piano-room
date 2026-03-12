@@ -24,7 +24,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'D:/nobody/vibecoding/dist',
+    outDir: 'dist',
     emptyOutDir: true,
     chunkSizeWarningLimit: 2000,
     rollupOptions: {

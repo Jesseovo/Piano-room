@@ -55,8 +55,8 @@ body {
   /* 状态色 */
   --color-success: #10b981;
   --color-success-bg: #d1fae5;
-  --color-warning: #f59e0b;
-  --color-warning-bg: #fef3c7;
+  --color-warning: #e65100;
+  --color-warning-bg: #fff3e0;
   --color-danger: #ef4444;
   --color-danger-bg: #fee2e2;
   --color-info: #64748b;

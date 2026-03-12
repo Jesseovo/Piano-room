@@ -638,15 +638,19 @@ body::after {
 }
 
 .el-message--error {
-  background: #ff4500 !important;
-  border-color: #cc3700 !important;
+  background: #d32f2f !important;
+  border-color: #b71c1c !important;
   color: white !important;
+  font-weight: bold !important;
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.4) !important;
 }
 
 .el-message--warning {
-  background: #ffa500 !important;
-  border-color: #ff8c00 !important;
+  background: #e65100 !important;
+  border-color: #bf360c !important;
   color: white !important;
+  font-weight: bold !important;
+  box-shadow: 0 4px 12px rgba(230, 81, 0, 0.4) !important;
 }
 
 /* 面包屑覆盖 */
