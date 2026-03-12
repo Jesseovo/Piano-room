@@ -87,6 +87,18 @@ public class RoomController {
         roomService.update(room);
         return Result.success();
     }
+
+    /**
+     * 设置琴房状态
+     */
+    @PutMapping("/{id}/status")
+    @Log(module = "琴房管理", type = "设置状态", description = "启用或停用琴房")
+    public Result setStatus(@PathVariable Long id, @RequestParam Integer status){
+        log.info("设置教室状态:id={}, status={}", id, status);
+        roomService.setStatus(id, status);
+        return Result.success();
+    }
+
     /**
      * 教室维护
      */

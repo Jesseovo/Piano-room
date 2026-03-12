@@ -32,6 +32,7 @@ export const roomApi = {
   getById: (id: number) => request.get(`/room/${id}`),
   create: (data: Partial<Room>) => request.post('/room', data),
   update: (data: Partial<Room>) => request.put('/room', data),
+  setStatus: (id: number, status: number) => request.put(`/room/${id}/status`, null, { params: { status } }),
   delete: (id: number) => request.delete(`/room/${id}`),
   search: (params: RoomSearchParams) => request.get('/room/search', { params }),
   getHotToday: (limit = 5) => request.get('/room/hot-today', { params: { limit } }),

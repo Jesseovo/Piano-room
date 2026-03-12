@@ -57,6 +57,11 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    public void setStatus(Long id, Integer status) {
+        roomMapper.updateStatus(id, status);
+    }
+
+    @Override
     public void maintenance(RoomMaintenance roomMaintenance) {
         roomMaintenance.setCreatedAt(LocalDateTime.now());
         roomMaintenance.setUpdatedAt(LocalDateTime.now());

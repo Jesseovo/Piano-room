@@ -164,7 +164,7 @@ async function handleSubmit() {
 
 async function handleSetStatus(row: Room) {
   const newStatus = row.status === 1 ? 0 : 1
-  const res = await roomApi.update({ id: row.id, status: newStatus })
+  const res = await roomApi.setStatus(row.id, newStatus)
   if (res?.code === 1) { ElMessage.success('状态已更新'); loadData() }
   else ElMessage.error(res?.msg || '操作失败')
 }

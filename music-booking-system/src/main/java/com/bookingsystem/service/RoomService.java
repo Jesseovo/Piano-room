@@ -21,6 +21,8 @@ public interface RoomService {
 
     void update(Room room);
 
+    void setStatus(Long id, Integer status);
+
     void maintenance(RoomMaintenance roomMaintenance);
 
     RoomMaintenance getMaintenance(Long roomId);

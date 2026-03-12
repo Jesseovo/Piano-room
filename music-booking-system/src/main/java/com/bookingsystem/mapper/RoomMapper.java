@@ -23,8 +23,14 @@ public interface RoomMapper {
 
     Room getById(Long id);
 
-    @Update("update rooms set room_number = #{roomNumber}, name = #{name}, building_id = #{buildingId},department_id = #{departmentId} ,floor = #{floor}, status=#{status}, capacity = #{capacity}, room_type_id = #{roomTypeId}, facilities = #{facilities}, description = #{description}, updated_at = #{updatedAt},seats = #{seats}  where id = #{id}")
+    @Update("update rooms set room_number = #{roomNumber}, name = #{name}, floor = #{floor}, status = #{status}, capacity = #{capacity}, room_type_id = #{roomTypeId}, facilities = #{facilities}, description = #{description}, updated_at = #{updatedAt} where id = #{id}")
     void update(Room room);
+
+    /**
+     * 只更新琴房状态
+     */
+    @Update("update rooms set status = #{status}, updated_at = NOW() where id = #{id}")
+    void updateStatus(@Param("id") Long id, @Param("status") Integer status);
 
     @Insert("insert into room_maintenance (room_id, start_time, end_time, reason, maintenance_type, created_at, updated_at) " +
             "values (#{roomId}, #{startTime}, #{endTime}, #{reason}, #{maintenanceType}, #{createdAt}, #{updatedAt})")

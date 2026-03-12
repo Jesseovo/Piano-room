@@ -4,10 +4,8 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.bookingsystem.mapper.RoomMapper">
     <insert id="save">
-        insert into rooms(room_number, name, building_id,department_id, floor, capacity, room_type_id, facilities, description, created_at,
-                          updated_at,seats)
-        values (#{roomNumber}, #{name}, #{buildingId},#{departmentId} ,#{floor}, #{capacity}, #{roomTypeId}, #{facilities}, #{description},
-                #{createdAt}, #{updatedAt},#{seats})
+        insert into rooms(room_number, name, floor, capacity, room_type_id, facilities, description, created_at, updated_at)
+        values (#{roomNumber}, #{name}, #{floor}, #{capacity}, #{roomTypeId}, #{facilities}, #{description}, #{createdAt}, #{updatedAt})
     </insert>
     <insert id="upsertMaintenanceRecord" parameterType="com.bookingsystem.pojo.RoomMaintenance">
         INSERT INTO room_maintenance (id, room_id, start_time, end_time, reason, maintenance_type)
