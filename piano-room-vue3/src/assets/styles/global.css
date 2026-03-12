@@ -236,6 +236,50 @@ body {
 .el-notification { border-radius: var(--border-radius-lg) !important; box-shadow: var(--shadow-lg) !important; }
 .el-message { border-radius: var(--border-radius-base) !important; }
 
+/* ElMessage 提示信息文字颜色改为白色 */
+.el-message__content {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+/* 不同类型消息的样式调整 */
+.el-message--success {
+  background-color: #10b981 !important;
+  border-color: #10b981 !important;
+}
+.el-message--success .el-message__content {
+  color: #ffffff !important;
+}
+
+.el-message--error {
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+}
+.el-message--error .el-message__content {
+  color: #ffffff !important;
+}
+
+.el-message--warning {
+  background-color: #f59e0b !important;
+  border-color: #f59e0b !important;
+}
+.el-message--warning .el-message__content {
+  color: #ffffff !important;
+}
+
+.el-message--info {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+}
+.el-message--info .el-message__content {
+  color: #ffffff !important;
+}
+
+/* 消息图标颜色也改为白色 */
+.el-message .el-message__icon {
+  color: #ffffff !important;
+}
+
 /* ===== 通用页面容器 ===== */
 .page-container {
   max-width: 1200px;
