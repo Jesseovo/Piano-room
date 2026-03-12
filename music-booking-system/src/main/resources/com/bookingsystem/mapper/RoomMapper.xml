@@ -23,14 +23,43 @@
 
 
     <select id="list" resultType="com.bookingsystem.vo.RoomQueryVO">
-        select r.id,r.room_number,r.name,
-               r.facilities,r.capacity,r.status ,r.department_id
+        SELECT
+            r.id,
+            r.room_number as roomNumber,
+            r.name,
+            r.floor,
+            r.capacity,
+            r.room_type_id as roomTypeId,
+            r.facilities,
+            r.status,
+            r.description,
+            r.created_at as createdAt,
+            r.updated_at as updatedAt
         FROM rooms r
+        <where>
+            <if test="status != null">
+                AND r.status = #{status}
+            </if>
+            <if test="roomNumberOrName != null and roomNumberOrName != ''">
+                AND (r.room_number LIKE CONCAT('%', #{roomNumberOrName}, '%')
+                     OR r.name LIKE CONCAT('%', #{roomNumberOrName}, '%'))
+            </if>
+        </where>
         ORDER BY r.capacity DESC
     </select>
     <select id="searchRooms" resultType="com.bookingsystem.vo.RoomQueryVO">
         SELECT
-            r.*
+            r.id,
+            r.room_number as roomNumber,
+            r.name,
+            r.floor,
+            r.capacity,
+            r.room_type_id as roomTypeId,
+            r.facilities,
+            r.status,
+            r.description,
+            r.created_at as createdAt,
+            r.updated_at as updatedAt
         FROM rooms r
         ORDER BY r.capacity DESC
     </select>

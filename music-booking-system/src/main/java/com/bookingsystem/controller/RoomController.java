@@ -1,5 +1,6 @@
 package com.bookingsystem.controller;
 
+import com.bookingsystem.annotation.Log;
 import com.bookingsystem.dto.RoomDTO;
 import com.bookingsystem.dto.RoomQueryDTO;
 import com.bookingsystem.pojo.PageResult;
@@ -42,6 +43,7 @@ public class RoomController {
      * @return
      */
     @PostMapping
+    @Log(module = "琴房管理", type = "添加琴房", description = "添加新的琴房")
     public Result save(@RequestBody Room room){
         log.info("添加教室:{}",room);
         roomService.save(room);
@@ -54,6 +56,7 @@ public class RoomController {
      * @return
      */
     @DeleteMapping("/{id}")
+    @Log(module = "琴房管理", type = "删除琴房", description = "根据id删除琴房")
     public Result deleteById(@PathVariable Long id){
         log.info("删除教室:{}",id);
         roomService.deleteById(id);
@@ -78,6 +81,7 @@ public class RoomController {
      * @return
      */
     @PutMapping
+    @Log(module = "琴房管理", type = "更新琴房", description = "更新琴房信息")
     public Result update(@RequestBody Room room){
         log.info("更新教室:{}",room);
         roomService.update(room);
@@ -87,6 +91,7 @@ public class RoomController {
      * 教室维护
      */
     @PostMapping("/maintenance")
+    @Log(module = "琴房管理", type = "琴房维护", description = "设置琴房维护状态")
     public Result maintenance(@RequestBody RoomMaintenance roomMaintenance){
         log.info("教室维护:{}",roomMaintenance);
         validateDateRange(roomMaintenance.getStartTime(), roomMaintenance.getEndTime());
@@ -108,6 +113,7 @@ public class RoomController {
      * 更新或者新增维护记录
      */
     @PostMapping("/maintenance/update-or-insert")
+    @Log(module = "琴房管理", type = "维护记录", description = "更新或新增琴房维护记录")
     public Result updateOrInsert(@RequestBody RoomMaintenance roomMaintenance){
         log.info("更新或者新增维护记录:{}",roomMaintenance);
         try {

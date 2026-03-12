@@ -11,7 +11,7 @@
     <el-card class="search-card" shadow="never">
       <el-form :model="query" inline>
         <el-form-item label="名称">
-          <el-input v-model="query.name" placeholder="琴房名称" clearable @keyup.enter="loadData" />
+          <el-input v-model="query.roomNumberOrName" placeholder="琴房名称或编号" clearable @keyup.enter="loadData" />
         </el-form-item>
         <el-form-item label="状态">
           <el-select v-model="query.status" clearable placeholder="全部" style="width:100px">
@@ -30,11 +30,11 @@
       <el-table v-loading="loading" :data="tableData" stripe border>
         <el-table-column label="房间号" prop="roomNumber" width="100" />
         <el-table-column label="名称" prop="name" min-width="120" />
-        <el-table-column label="类型" prop="type" width="120" />
+        <el-table-column label="楼层" prop="floor" width="80" />
         <el-table-column label="容量" prop="capacity" width="80">
           <template #default="{ row }">{{ row.capacity }}人</template>
         </el-table-column>
-        <el-table-column label="院系" prop="departmentName" min-width="120" />
+        <el-table-column label="描述" prop="description" min-width="150" show-overflow-tooltip />
         <el-table-column label="状态" width="90">
           <template #default="{ row }">
             <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">
@@ -109,7 +109,7 @@ const dialogVisible = ref(false)
 const editingRoom = ref<Room | null>(null)
 const formRef = ref<FormInstance>()
 
-const query = reactive({ page: 1, pageSize: 10, name: '', status: undefined as number | undefined })
+const query = reactive({ page: 1, pageSize: 10, roomNumberOrName: '', status: undefined as number | undefined })
 
 const form = reactive({
   roomNumber: '', name: '', floor: 1, capacity: 10, facilities: '', description: ''
@@ -132,7 +132,7 @@ async function loadData() {
 }
 
 function resetQuery() {
-  query.page = 1; query.name = ''; query.status = undefined
+  query.page = 1; query.roomNumberOrName = ''; query.status = undefined
   loadData()
 }
 
