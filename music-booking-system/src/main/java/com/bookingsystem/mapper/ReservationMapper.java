@@ -21,7 +21,8 @@ import java.util.List;
 public interface ReservationMapper {
     @Select("SELECT * FROM reservations WHERE room_id = #{roomId} " +
             "AND DATE(start_time) = #{date} " +
-            "AND status IN ('approved', 'completed')")
+            "AND status IN ('approved', 'completed') " +
+            "AND sign_end_time IS NULL")
     List<Reservation> findReservedSlots(@Param("roomId") Long roomId,
                                         @Param("date") String date);
 
@@ -36,7 +37,8 @@ public interface ReservationMapper {
             "WHERE room_id = #{roomId} " +
             "AND status = 'approved' " +
             "AND ((start_time < #{endTime} AND end_time > #{startTime})) " +
-            "AND NOT (sign_start_time IS NULL AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > 10)")
+            "AND NOT (sign_start_time IS NULL AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > 10) " +
+            "AND sign_end_time IS NULL")
     int checkConflict(Long roomId, LocalDateTime startTime, LocalDateTime endTime);
 
     /**
@@ -48,19 +50,21 @@ public interface ReservationMapper {
             "AND status = 'approved' " +
             "AND ((start_time < #{endTime} AND end_time > #{startTime})) " +
             "AND NOT (sign_start_time IS NULL AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > 10) " +
+            "AND sign_end_time IS NULL " +
             "FOR UPDATE")
     int checkConflictForUpdate(@Param("roomId") Long roomId,
                                @Param("startTime") LocalDateTime startTime,
                                @Param("endTime") LocalDateTime endTime);
 
     /**
-     * 检查同一用户在同一时间段是否有其他预约
+     * 检查同一用户在同一时间段是否有其他预约（已签退的除外）
      */
     @Select("SELECT COUNT(*) FROM reservations " +
             "WHERE user_id = #{userId} " +
             "AND status = 'approved' " +
             "AND ((start_time < #{endTime} AND end_time > #{startTime})) " +
             "AND NOT (sign_start_time IS NULL AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > 10) " +
+            "AND sign_end_time IS NULL " +
             "FOR UPDATE")
     int checkUserConflict(@Param("userId") Long userId,
                           @Param("startTime") LocalDateTime startTime,
