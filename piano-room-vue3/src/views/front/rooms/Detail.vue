@@ -112,7 +112,8 @@
                     <span class="slot-hint" v-if="slot.available && !slot.isPast && !slot.isStarted">点击立即抢占</span>
                     <span class="slot-hint ongoing-hint" v-else-if="slot.available && !slot.isPast && slot.isStarted">进行中可约</span>
                     <span class="slot-hint past-hint" v-else-if="slot.isPast">已过期</span>
-                    <span class="slot-hint booked-hint" v-else>已被预约</span>
+                    <span class="slot-hint booked-hint" v-else-if="slot.isMyReservation">已预约</span>
+                    <span class="slot-hint booked-hint" v-else>已满员</span>
                   </div>
                   <div class="slot-right">
                     <div v-if="slot.available && !slot.isPast" class="pulse-dot" />
@@ -282,6 +283,7 @@ function generateSlots(booked: any[]) {
   const now = dayjs()
   const startHour = settingsStore.basicSettings?.slotStartHour ?? 8
   const endHour = settingsStore.basicSettings?.slotEndHour ?? 22
+  const currentUserId = authStore.user?.id
   let cur = dayjs(date).hour(startHour).minute(0)
   const end = dayjs(date).hour(endHour).minute(0)
 
@@ -294,6 +296,7 @@ function generateSlots(booked: any[]) {
     const actualEnd = slotEnd.isAfter(end) ? end : slotEnd
 
     if (next && (cur.isSame(dayjs(next.isoStart)) || !cur.isBefore(dayjs(next.isoStart)))) {
+      const isMyReservation = currentUserId && next.userId === currentUserId
       slots.push({
         id: `booked-${idx}`,
         startTime: dayjs(next.isoStart).format('HH:mm'),
@@ -302,6 +305,7 @@ function generateSlots(booked: any[]) {
         isoEnd: next.isoEnd,
         available: false,
         isPast: false,
+        isMyReservation,
       })
       cur = dayjs(next.isoEnd)
       idx++
