@@ -165,9 +165,9 @@
             </template>
             <ul class="notice-list">
               <li>提交申请后，等待管理员审核通过方可使用</li>
-              <li>开放时间：每日 <strong>08:00 - 22:00</strong></li>
-              <li>超过预约开始时间 <strong>10 分钟</strong>未签到，系统自动释放</li>
-              <li>每月爽约超过 <strong>3 次</strong>将暂停预约权限</li>
+              <li>开放时间：每日 <strong>{{ slotStartHour }}:00 - {{ slotEndHour }}:00</strong></li>
+              <li>超过预约开始时间 <strong>{{ signInGrace }} 分钟</strong>未签到，系统自动释放</li>
+              <li>每月爽约超过 <strong>{{ maxNoShow }} 次</strong>将暂停预约权限</li>
               <li>请爱护琴房设备，发现问题及时联系管理员</li>
             </ul>
           </el-card>
@@ -193,6 +193,10 @@ const authStore = useAuthStore()
 const settingsStore = useSettingsStore()
 
 const maxAdvanceDays = computed(() => settingsStore.reservationSettings?.maxAdvanceDays ?? 7)
+const signInGrace = computed(() => settingsStore.reservationSettings?.signInGrace ?? 10)
+const maxNoShow = computed(() => settingsStore.reservationSettings?.maxNoShow ?? 3)
+const slotStartHour = computed(() => settingsStore.basicSettings?.slotStartHour ?? 8)
+const slotEndHour = computed(() => settingsStore.basicSettings?.slotEndHour ?? 22)
 
 const formRef = ref<FormInstance>()
 const loadingRoom = ref(false)
@@ -204,7 +208,7 @@ const roomId = Number(route.params.roomId) || undefined
 const queryStart = route.query.start as string
 const queryEnd = route.query.end as string
 
-const defaultStartTime = new Date(0, 0, 0, 8, 0, 0)
+const defaultStartTime = computed(() => new Date(0, 0, 0, slotStartHour.value, 0, 0))
 
 const roomGradient = computed(() => {
   const gradients = [
@@ -296,8 +300,8 @@ async function handleSubmit() {
     }
     const startH = start.hour() * 60 + start.minute()
     const endH = end.hour() * 60 + end.minute()
-    if (startH < 8 * 60 || endH > 22 * 60) {
-      ElMessage.warning('预约时间需在 08:00 - 22:00 之间')
+    if (startH < slotStartHour.value * 60 || endH > slotEndHour.value * 60) {
+      ElMessage.warning(`预约时间需在 ${slotStartHour.value}:00 - ${slotEndHour.value}:00 之间`)
       return
     }
     if (!roomId) {

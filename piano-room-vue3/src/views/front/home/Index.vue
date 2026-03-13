@@ -163,11 +163,14 @@ const steps = [
   { title: '签到使用', desc: '按时签到，愉快练琴', icon: '✅', color: 'orange' },
 ]
 
-const rules = [
+const signInGrace = computed(() => settingsStore.reservationSettings?.signInGrace ?? 10)
+const maxNoShow = computed(() => settingsStore.reservationSettings?.maxNoShow ?? 3)
+
+const rules = computed(() => [
   {
     icon: '📅',
     title: '预约规则',
-    items: ['需使用学校统一认证账号登录', '提交预约后即时生效，无需等待审核', '预约后 10 分钟内须签到，超时标记违约'],
+    items: ['需使用学校统一认证账号登录', '提交预约后即时生效，无需等待审核', `预约后 ${signInGrace.value} 分钟内须签到，超时标记违约`],
   },
   {
     icon: '🎼',
@@ -177,9 +180,9 @@ const rules = [
   {
     icon: '⚠️',
     title: '违约说明',
-    items: ['第 1 次违约：系统警告提示', '第 2 次违约：封禁 7 天', '第 3 次违约：封禁 30 天'],
+    items: ['第 1 次违约：系统警告提示', `第 2 次违约：封禁 ${maxNoShow.value > 1 ? '7' : 'N'} 天`, `第 3 次违约：封禁 ${maxNoShow.value > 2 ? '30' : 'N'} 天`],
   },
-]
+])
 
 async function loadBookingStatus() {
   try {

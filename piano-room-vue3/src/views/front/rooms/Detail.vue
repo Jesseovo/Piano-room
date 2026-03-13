@@ -32,7 +32,7 @@
                 <el-descriptions-item label="容量">{{ room.capacity }}人</el-descriptions-item>
                 <el-descriptions-item label="类型">{{ (room as any).type || '-' }}</el-descriptions-item>
                 <el-descriptions-item label="院系">{{ (room as any).departmentName || '-' }}</el-descriptions-item>
-                <el-descriptions-item label="开放时间">08:00 - 22:00</el-descriptions-item>
+                <el-descriptions-item label="开放时间">{{ settingsStore.basicSettings?.slotStartHour ?? 8 }}:00 - {{ settingsStore.basicSettings?.slotEndHour ?? 22 }}:00</el-descriptions-item>
               </el-descriptions>
 
               <div class="section" v-if="room.facilities">
@@ -280,8 +280,10 @@ function generateSlots(booked: any[]) {
   const slots: any[] = []
   const date = selectedDate.value
   const now = dayjs()
-  let cur = dayjs(date).hour(8).minute(0)
-  const end = dayjs(date).hour(22).minute(0)
+  const startHour = settingsStore.basicSettings?.slotStartHour ?? 8
+  const endHour = settingsStore.basicSettings?.slotEndHour ?? 22
+  let cur = dayjs(date).hour(startHour).minute(0)
+  const end = dayjs(date).hour(endHour).minute(0)
 
   const sorted = [...booked].sort((a, b) => dayjs(a.isoStart).valueOf() - dayjs(b.isoStart).valueOf())
 
