@@ -53,6 +53,20 @@ public interface ReservationMapper {
     int checkConflict(Long roomId, LocalDateTime startTime, LocalDateTime endTime);
 
     /**
+     * 检查同一用户是否已预约同一房间同一时段
+     */
+    @Select("SELECT COUNT(*) FROM reservations " +
+            "WHERE user_id = #{userId} " +
+            "AND room_id = #{roomId} " +
+            "AND status = 'approved' " +
+            "AND ((start_time < #{endTime} AND end_time > #{startTime})) " +
+            "AND sign_end_time IS NULL")
+    int checkUserRoomConflict(@Param("userId") Long userId,
+                              @Param("roomId") Long roomId,
+                              @Param("startTime") LocalDateTime startTime,
+                              @Param("endTime") LocalDateTime endTime);
+
+    /**
      * 查询指定时段已预约的总人数（用于容量检查）
      */
     @Select("SELECT COALESCE(SUM(attendees), 0) FROM reservations " +
@@ -81,13 +95,12 @@ public interface ReservationMapper {
                                @Param("endTime") LocalDateTime endTime);
 
     /**
-     * 检查同一用户在同一时间段是否有其他预约（已签退的除外）
+     * 检查同一用户在同一时间段是否有其他有效预约（已签退或已取消的除外）
      */
     @Select("SELECT COUNT(*) FROM reservations " +
             "WHERE user_id = #{userId} " +
             "AND status = 'approved' " +
             "AND ((start_time < #{endTime} AND end_time > #{startTime})) " +
-            "AND NOT (sign_start_time IS NULL AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > 10) " +
             "AND sign_end_time IS NULL " +
             "FOR UPDATE")
     int checkUserConflict(@Param("userId") Long userId,
@@ -105,6 +118,21 @@ public interface ReservationMapper {
             @Param("roomId") Long roomId,
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime);
+
+    /**
+     * 查找用户在同一时间其他房间的预约（用于签到时取消其他预约）
+     */
+    @Select("SELECT * FROM reservations " +
+            "WHERE user_id = #{userId} " +
+            "AND room_id != #{roomId} " +
+            "AND status = 'approved' " +
+            "AND ((start_time < #{endTime} AND end_time > #{startTime})) " +
+            "AND sign_start_time IS NULL " +
+            "AND sign_end_time IS NULL")
+    List<Reservation> findUserOtherRoomReservations(@Param("userId") Long userId,
+                                                     @Param("roomId") Long roomId,
+                                                     @Param("startTime") LocalDateTime startTime,
+                                                     @Param("endTime") LocalDateTime endTime);
 
 
     int countReserve(CountReservationsDTO countReservationsDTO);

@@ -19,6 +19,7 @@ import com.bookingsystem.vo.PracticeDurationVO;
 import com.bookingsystem.vo.UserReservationStatsVO;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ReservationServiceImpl implements ReservationService {
     @Autowired
@@ -108,11 +110,10 @@ public class ReservationServiceImpl implements ReservationService {
             throw new Exception("该时段剩余容量不足，已预约" + reservedAttendees + "人，容量" + room.getCapacity() + "人");
         }
 
-        // 检查同一用户在同一时间段是否有其他预约
-        if (reservationMapper.checkUserConflict(userId,
-                dto.getStartTime(),
-                dto.getEndTime()) > 0) {
-            throw new Exception("您在该时间段已有其他预约，无法重复预约");
+        // 检查同一用户是否已预约同一房间同一时段
+        if (reservationMapper.checkUserRoomConflict(userId, dto.getRoomId(),
+                dto.getStartTime(), dto.getEndTime()) > 0) {
+            throw new Exception("您在该时段已预约了该琴房，无法重复预约");
         }
 
         Reservation reservation = new Reservation();
@@ -197,9 +198,9 @@ public class ReservationServiceImpl implements ReservationService {
             throw new BusinessException("手速不够快！该时段已被他人抢占");
         }
 
-        // 检查同一用户在同一时间段是否有其他预约
-        if (reservationMapper.checkUserConflict(userId, startTime, endTime) > 0) {
-            throw new BusinessException("您在该时间段已有其他预约，无法重复预约");
+        // 检查同一用户是否已预约同一房间同一时段
+        if (reservationMapper.checkUserRoomConflict(userId, dto.getRoomId(), startTime, endTime) > 0) {
+            throw new BusinessException("您在该时段已预约了该琴房，无法重复预约");
         }
 
         // 自动生成标题和目的
@@ -345,15 +346,26 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setSignStartTime(now);
         reservationMapper.update(reservation);
 
+        // 取消用户在同一时间其他房间的预约
+        List<Reservation> otherReservations = reservationMapper.findUserOtherRoomReservations(
+                reservation.getUserId(), reservation.getRoomId(), startTime, endTime);
+        for (Reservation other : otherReservations) {
+            other.setStatus("cancelled");
+            other.setReviewRemarks("因在其他琴房签到而自动取消");
+            reservationMapper.update(other);
+            log.info("用户 {} 在琴房 {} 签到，自动取消其他预约 {}",
+                    reservation.getUserId(), reservation.getRoomId(), other.getId());
+        }
+
         // 检查是否超过开始时间宽限期
         LocalDateTime allowedSignInTime = startTime.plusMinutes(signInGrace);
         if (now.isAfter(allowedSignInTime)) {
             // 超时签到，但记录签到时间
-            return Result.successMsg("超时签到");
+            return Result.successMsg("超时签到" + (otherReservations.isEmpty() ? "" : "，已自动取消其他预约"));
         }
 
         // 正常签到
-        return Result.successMsg("签到成功");
+        return Result.successMsg("签到成功" + (otherReservations.isEmpty() ? "" : "，已自动取消其他预约"));
     }
     @Override
     public Result signOut(Long reservationId) {
