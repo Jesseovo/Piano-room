@@ -96,11 +96,16 @@ public class ReservationServiceImpl implements ReservationService {
         // 基础验证
         validateReservation(dto);
 
-        // 检查冲突（排除已更新的预约后）
-        if (reservationMapper.checkConflict(dto.getRoomId(),
-                dto.getStartTime(),
-                dto.getEndTime()) > 0) {
-            throw new Exception("时间段已被预约");
+        // 检查容量
+        Room room = roomMapper.getById(dto.getRoomId());
+        if (room == null) {
+            throw new Exception("琴房不存在");
+        }
+        Integer reservedAttendees = reservationMapper.getReservedAttendees(
+                dto.getRoomId(), dto.getStartTime(), dto.getEndTime());
+        int newAttendees = dto.getAttendees() != null ? dto.getAttendees() : 1;
+        if (reservedAttendees + newAttendees > room.getCapacity()) {
+            throw new Exception("该时段剩余容量不足，已预约" + reservedAttendees + "人，容量" + room.getCapacity() + "人");
         }
 
         // 检查同一用户在同一时间段是否有其他预约
@@ -178,6 +183,13 @@ public class ReservationServiceImpl implements ReservationService {
         if (user.getBanUntil() != null && user.getBanUntil().isAfter(now)) {
             String banStr = user.getBanUntil().toString().replace("T", " ").substring(0, 16);
             throw new BusinessException("账号因违约被封禁至 " + banStr + "，无法预约");
+        }
+
+        // 检查容量
+        Integer reservedAttendees = reservationMapper.getReservedAttendees(
+                dto.getRoomId(), startTime, endTime);
+        if (reservedAttendees + 1 > room.getCapacity()) {
+            throw new BusinessException("该时段已满员，已预约" + reservedAttendees + "人，容量" + room.getCapacity() + "人");
         }
 
         // 悲观锁冲突检测：SELECT FOR UPDATE 加行锁，高并发下只有一个请求能通过

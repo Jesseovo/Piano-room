@@ -132,9 +132,9 @@
               </span>
             </template>
             <div class="room-info-banner" :style="{ background: roomGradient }">
-              <el-icon size="36" color="rgba(255,255,255,0.9)"><Headset /></el-icon>
+              <el-icon size="36" color="#333"><Headset /></el-icon>
               <div class="room-info-text">
-                <div class="room-info-name">{{ room.name }}</div>
+                <div class="room-info-name" style="color: #333;">{{ room.name }}</div>
                 <el-tag :type="room.status === 1 ? 'success' : 'danger'" size="small" effect="light">
                   {{ room.status === 1 ? '可预约' : '维护中' }}
                 </el-tag>

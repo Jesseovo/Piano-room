@@ -19,10 +19,21 @@ import java.util.List;
 // ReservationMapper.java
 @Mapper
 public interface ReservationMapper {
-    @Select("SELECT * FROM reservations WHERE room_id = #{roomId} " +
-            "AND DATE(start_time) = #{date} " +
-            "AND status IN ('approved', 'completed') " +
-            "AND sign_end_time IS NULL")
+    @Select("SELECT r.* FROM reservations r " +
+            "WHERE r.room_id = #{roomId} " +
+            "AND DATE(r.start_time) = #{date} " +
+            "AND r.status IN ('approved', 'completed') " +
+            "AND r.sign_end_time IS NULL " +
+            "AND (" +
+            "  SELECT COALESCE(SUM(r2.attendees), 0) FROM reservations r2 " +
+            "  WHERE r2.room_id = r.room_id " +
+            "  AND r2.status IN ('approved', 'completed') " +
+            "  AND r2.sign_end_time IS NULL " +
+            "  AND r2.start_time = r.start_time " +
+            "  AND r2.end_time = r.end_time" +
+            ") >= (" +
+            "  SELECT capacity FROM rooms WHERE id = r.room_id" +
+            ")")
     List<Reservation> findReservedSlots(@Param("roomId") Long roomId,
                                         @Param("date") String date);
 
@@ -40,6 +51,19 @@ public interface ReservationMapper {
             "AND NOT (sign_start_time IS NULL AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > 10) " +
             "AND sign_end_time IS NULL")
     int checkConflict(Long roomId, LocalDateTime startTime, LocalDateTime endTime);
+
+    /**
+     * 查询指定时段已预约的总人数（用于容量检查）
+     */
+    @Select("SELECT COALESCE(SUM(attendees), 0) FROM reservations " +
+            "WHERE room_id = #{roomId} " +
+            "AND status = 'approved' " +
+            "AND ((start_time < #{endTime} AND end_time > #{startTime})) " +
+            "AND NOT (sign_start_time IS NULL AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > 10) " +
+            "AND sign_end_time IS NULL")
+    Integer getReservedAttendees(@Param("roomId") Long roomId,
+                                 @Param("startTime") LocalDateTime startTime,
+                                 @Param("endTime") LocalDateTime endTime);
 
     /**
      * 悲观锁：查询冲突预约并加行锁，防止高并发超卖
