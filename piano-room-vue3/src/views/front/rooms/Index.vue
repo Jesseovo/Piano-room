@@ -304,6 +304,7 @@ const slotStartHour = computed(() => settingsStore.basicSettings?.slotStartHour 
 const slotEndHour = computed(() => settingsStore.basicSettings?.slotEndHour ?? 22)
 const slotDurationMinutes = computed(() => settingsStore.basicSettings?.slotDurationMinutes ?? 120)
 const bookingResetHour = computed(() => settingsStore.basicSettings?.bookingResetHour ?? 0)
+const maxAdvanceDays = computed(() => settingsStore.reservationSettings?.maxAdvanceDays ?? 7)
 
 // ===== 时段弹窗状态 =====
 const slotDialogVisible = ref(false)
@@ -319,21 +320,26 @@ const quickRemarks = ref('')
 const booking = ref(false)
 
 /**
- * 禁用日期：只允许今天和明天
- * 如果当前时间还未到 bookingResetHour，则不允许选择明天
+ * 禁用日期：根据 maxAdvanceDays 设置允许预约的日期范围
+ * 如果当前时间还未到 bookingResetHour，则不允许选择明天及以后
  */
 function disabledDate(d: Date) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
+
+  // 今天之前的日期禁用
+  if (d < today) return true
+
+  // 计算最大可预约日期
+  const maxDate = new Date(today)
+  maxDate.setDate(today.getDate() + maxAdvanceDays.value)
+
+  // 超过最大提前预约天数的日期禁用
+  if (d >= maxDate) return true
+
+  // 明天及以后的日期：只有当前时间 >= bookingResetHour 才开放
   const tomorrow = new Date(today)
   tomorrow.setDate(today.getDate() + 1)
-  const dayAfterTomorrow = new Date(today)
-  dayAfterTomorrow.setDate(today.getDate() + 2)
-
-  // 今天之前 或 后天及以后 -> 禁用
-  if (d < today || d >= dayAfterTomorrow) return true
-
-  // 明天：只有当前时间 >= bookingResetHour 才开放
   if (d >= tomorrow) {
     const currentHour = new Date().getHours()
     return currentHour < bookingResetHour.value

@@ -81,7 +81,7 @@
                     type="date"
                     value-format="YYYY-MM-DD"
                     size="small"
-                    :disabled-date="(d: Date) => d < new Date(new Date().setHours(0,0,0,0))"
+                    :disabled-date="disabledDate"
                     @change="loadTimeSlots"
                     style="width: 130px"
                   />
@@ -195,11 +195,15 @@ import dayjs from 'dayjs'
 import { roomApi } from '@/api/room'
 import { reservationApi } from '@/api/reservation'
 import { useAuthStore } from '@/stores/auth'
+import { useSettingsStore } from '@/stores/settings'
 import type { Room } from '@/api/types'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const settingsStore = useSettingsStore()
+
+const maxAdvanceDays = computed(() => settingsStore.reservationSettings?.maxAdvanceDays ?? 7)
 
 const loading = ref(true)
 const loadingSlots = ref(false)
@@ -225,6 +229,23 @@ const facilitiesList = computed(() => {
     return [room.value.facilities]
   }
 })
+
+function disabledDate(d: Date) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  // 今天之前的日期禁用
+  if (d < today) return true
+
+  // 计算最大可预约日期
+  const maxDate = new Date(today)
+  maxDate.setDate(today.getDate() + maxAdvanceDays.value)
+
+  // 超过最大提前预约天数的日期禁用
+  if (d >= maxDate) return true
+
+  return false
+}
 
 async function loadRoom() {
   loading.value = true

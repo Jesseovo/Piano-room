@@ -1,5 +1,7 @@
 package com.bookingsystem.service.impl;
 
+import com.alibaba.fastjson2.JSON;
+import com.bookingsystem.config.InMemoryDataStore;
 import com.bookingsystem.dto.AvaDTO;
 import com.bookingsystem.dto.QuickReservationDTO;
 import com.bookingsystem.dto.ReservationDTO;
@@ -37,6 +39,26 @@ public class ReservationServiceImpl implements ReservationService {
     private RoomMapper roomMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private InMemoryDataStore inMemoryDataStore;
+
+    /**
+     * 获取最大提前预约天数（从系统配置读取，默认7天）
+     */
+    private int getMaxAdvanceDays() {
+        String setting = inMemoryDataStore.get("reservationSetting");
+        if (setting != null) {
+            try {
+                ReservationSetting reservationSetting = JSON.parseObject(setting, ReservationSetting.class);
+                if (reservationSetting != null && reservationSetting.getMaxAdvanceDays() != null) {
+                    return reservationSetting.getMaxAdvanceDays();
+                }
+            } catch (Exception e) {
+                // 解析失败使用默认值
+            }
+        }
+        return 7; // 默认7天
+    }
 
     // 获取某天已预约时段
     @Override
@@ -116,8 +138,9 @@ public class ReservationServiceImpl implements ReservationService {
         if (!startTime.toLocalDate().isEqual(endTime.toLocalDate())) {
             throw new BusinessException("不可跨天预约");
         }
-        if (endTime.isAfter(now.plusDays(7))) {
-            throw new BusinessException("预约时间不能超过7天");
+        int maxAdvanceDays = getMaxAdvanceDays();
+        if (endTime.isAfter(now.plusDays(maxAdvanceDays))) {
+            throw new BusinessException("预约时间不能超过" + maxAdvanceDays + "天");
         }
 
         // 校验琴房可用
@@ -342,10 +365,11 @@ public class ReservationServiceImpl implements ReservationService {
             throw new BusinessException("不可跨天预约");
         }
 
-        // 七天限制
-        LocalDateTime maxTime = LocalDateTime.now().plusDays(7);
+        // 提前预约天数限制
+        int maxAdvanceDays = getMaxAdvanceDays();
+        LocalDateTime maxTime = LocalDateTime.now().plusDays(maxAdvanceDays);
         if (dto.getEndTime().isAfter(maxTime)) {
-            throw new BusinessException("预约时间不能超过7天");
+            throw new BusinessException("预约时间不能超过" + maxAdvanceDays + "天");
         }
 
         // 检查该预约时间段是否在数据库中存在

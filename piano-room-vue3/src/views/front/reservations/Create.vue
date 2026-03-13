@@ -185,10 +185,14 @@ import dayjs from 'dayjs'
 import { roomApi } from '@/api/room'
 import { reservationApi } from '@/api/reservation'
 import { useAuthStore } from '@/stores/auth'
+import { useSettingsStore } from '@/stores/settings'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const settingsStore = useSettingsStore()
+
+const maxAdvanceDays = computed(() => settingsStore.reservationSettings?.maxAdvanceDays ?? 7)
 
 const formRef = ref<FormInstance>()
 const loadingRoom = ref(false)
@@ -229,7 +233,20 @@ const rules: FormRules = {
 }
 
 function disabledDate(d: Date) {
-  return d < new Date(new Date().setHours(0, 0, 0, 0))
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  // 今天之前的日期禁用
+  if (d < today) return true
+
+  // 计算最大可预约日期
+  const maxDate = new Date(today)
+  maxDate.setDate(today.getDate() + maxAdvanceDays.value)
+
+  // 超过最大提前预约天数的日期禁用
+  if (d >= maxDate) return true
+
+  return false
 }
 
 function handleStartChange(val: string) {

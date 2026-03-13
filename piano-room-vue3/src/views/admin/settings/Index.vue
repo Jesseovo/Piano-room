@@ -192,11 +192,13 @@ async function loadSettings() {
     // 加载预约设置
     const resvRes = await request.get('/system/settings/reservation')
     if (resvRes?.code === 1 && resvRes.data) {
-      Object.assign(reservationForm, {
+      const settings = {
         maxAdvanceDays: resvRes.data.maxAdvanceDays ?? 7,
         signInGrace: resvRes.data.signInGrace ?? 10,
         maxNoShow: resvRes.data.maxNoShow ?? 3,
-      })
+      }
+      Object.assign(reservationForm, settings)
+      settingsStore.setReservationSettings(settings)
     }
   } catch { /* 静默 */ }
 
@@ -227,8 +229,10 @@ async function saveReservation() {
   saving.value = true
   try {
     const res = await request.post('/system/settings/reservation', reservationForm)
-    if (res?.code === 1) ElMessage.success('保存成功')
-    else ElMessage.error(res?.msg || '保存失败')
+    if (res?.code === 1) {
+      settingsStore.setReservationSettings({ ...reservationForm })
+      ElMessage.success('保存成功')
+    } else ElMessage.error(res?.msg || '保存失败')
   } finally { saving.value = false }
 }
 

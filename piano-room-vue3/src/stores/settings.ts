@@ -17,10 +17,25 @@ export interface BasicSettings {
   bookingResetHour: number
 }
 
+export interface ReservationSettings {
+  /** 最长提前预约天数（默认7天） */
+  maxAdvanceDays: number
+  /** 签到宽限时间（分钟，默认10分钟） */
+  signInGrace: number
+  /** 最大爽约次数（默认3次） */
+  maxNoShow: number
+}
+
 export const useSettingsStore = defineStore('settings', () => {
   const basicSettings = ref<BasicSettings | null>(
     localStorage.getItem('basicSettings')
       ? JSON.parse(localStorage.getItem('basicSettings')!)
+      : null
+  )
+
+  const reservationSettings = ref<ReservationSettings | null>(
+    localStorage.getItem('reservationSettings')
+      ? JSON.parse(localStorage.getItem('reservationSettings')!)
       : null
   )
 
@@ -29,5 +44,10 @@ export const useSettingsStore = defineStore('settings', () => {
     localStorage.setItem('basicSettings', JSON.stringify(settings))
   }
 
-  return { basicSettings, setBasicSettings }
+  function setReservationSettings(settings: ReservationSettings) {
+    reservationSettings.value = settings
+    localStorage.setItem('reservationSettings', JSON.stringify(settings))
+  }
+
+  return { basicSettings, setBasicSettings, reservationSettings, setReservationSettings }
 })
