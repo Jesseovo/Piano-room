@@ -362,6 +362,8 @@ public class ReservationServiceImpl implements ReservationService {
             return Result.error("预约未开始，无法签退");
         }
         reservation.setSignEndTime(now);
+        // 签退后立即标记为已完成
+        reservation.setStatus("completed");
         reservationMapper.update(reservation);
         return Result.successMsg("签退成功");
     }
