@@ -21,4 +21,7 @@ public class QuickReservationDTO {
 
     /** 可选备注 */
     private String remarks;
+
+    /** 预约人数（默认1人） */
+    private Integer attendees = 1;
 }

@@ -48,9 +48,12 @@ public interface ReservationMapper {
             "WHERE room_id = #{roomId} " +
             "AND status = 'approved' " +
             "AND ((start_time < #{endTime} AND end_time > #{startTime})) " +
-            "AND NOT (sign_start_time IS NULL AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > 10) " +
+            "AND NOT (sign_start_time IS NULL AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > #{graceMinutes}) " +
             "AND sign_end_time IS NULL")
-    int checkConflict(Long roomId, LocalDateTime startTime, LocalDateTime endTime);
+    int checkConflict(@Param("roomId") Long roomId,
+                      @Param("startTime") LocalDateTime startTime,
+                      @Param("endTime") LocalDateTime endTime,
+                      @Param("graceMinutes") int graceMinutes);
 
     /**
      * 检查同一用户是否已预约同一房间同一时段
@@ -73,11 +76,12 @@ public interface ReservationMapper {
             "WHERE room_id = #{roomId} " +
             "AND status = 'approved' " +
             "AND ((start_time < #{endTime} AND end_time > #{startTime})) " +
-            "AND NOT (sign_start_time IS NULL AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > 10) " +
+            "AND NOT (sign_start_time IS NULL AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > #{graceMinutes}) " +
             "AND sign_end_time IS NULL")
     Integer getReservedAttendees(@Param("roomId") Long roomId,
                                  @Param("startTime") LocalDateTime startTime,
-                                 @Param("endTime") LocalDateTime endTime);
+                                 @Param("endTime") LocalDateTime endTime,
+                                 @Param("graceMinutes") int graceMinutes);
 
     /**
      * 悲观锁：查询冲突预约并加行锁，防止高并发超卖
@@ -87,12 +91,13 @@ public interface ReservationMapper {
             "WHERE room_id = #{roomId} " +
             "AND status = 'approved' " +
             "AND ((start_time < #{endTime} AND end_time > #{startTime})) " +
-            "AND NOT (sign_start_time IS NULL AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > 10) " +
+            "AND NOT (sign_start_time IS NULL AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > #{graceMinutes}) " +
             "AND sign_end_time IS NULL " +
             "FOR UPDATE")
     int checkConflictForUpdate(@Param("roomId") Long roomId,
                                @Param("startTime") LocalDateTime startTime,
-                               @Param("endTime") LocalDateTime endTime);
+                               @Param("endTime") LocalDateTime endTime,
+                               @Param("graceMinutes") int graceMinutes);
 
     /**
      * 检查同一用户在同一时间段是否有其他有效预约（已签退或已取消的除外）
@@ -107,17 +112,18 @@ public interface ReservationMapper {
                           @Param("startTime") LocalDateTime startTime,
                           @Param("endTime") LocalDateTime endTime);
 
-    // 查找与时间段冲突且超过10分钟未签到的预约
+    // 查找与时间段冲突且超过宽限时间未签到的预约
     @Select("SELECT * FROM reservations " +
             "WHERE room_id = #{roomId} " +
             "AND status = 'approved' " +
             "AND ((start_time < #{endTime} AND end_time > #{startTime})) " +
             "AND sign_start_time IS NULL " +
-            "AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > 10")
+            "AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) > #{graceMinutes}")
     List<Reservation> findConflictingUnattendedReservations(
             @Param("roomId") Long roomId,
             @Param("startTime") LocalDateTime startTime,
-            @Param("endTime") LocalDateTime endTime);
+            @Param("endTime") LocalDateTime endTime,
+            @Param("graceMinutes") int graceMinutes);
 
     /**
      * 查找用户在同一时间其他房间的预约（用于签到时取消其他预约）

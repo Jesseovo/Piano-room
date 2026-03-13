@@ -129,7 +129,7 @@
               AND end_time &gt; #{startTime}
               AND NOT (
                   sign_start_time IS NULL
-                  AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) &gt; 10
+                  AND TIMESTAMPDIFF(MINUTE, start_time, NOW()) &gt; #{graceMinutes}
               )
               AND status = 'approved'
         )

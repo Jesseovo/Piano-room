@@ -98,13 +98,16 @@ public class ReservationServiceImpl implements ReservationService {
         // 基础验证
         validateReservation(dto);
 
+        // 获取签到宽限时间
+        int graceMinutes = getSignInGraceMinutes();
+
         // 检查容量
         Room room = roomMapper.getById(dto.getRoomId());
         if (room == null) {
             throw new Exception("琴房不存在");
         }
         Integer reservedAttendees = reservationMapper.getReservedAttendees(
-                dto.getRoomId(), dto.getStartTime(), dto.getEndTime());
+                dto.getRoomId(), dto.getStartTime(), dto.getEndTime(), graceMinutes);
         int newAttendees = dto.getAttendees() != null ? dto.getAttendees() : 1;
         if (reservedAttendees + newAttendees > room.getCapacity()) {
             throw new Exception("该时段剩余容量不足，已预约" + reservedAttendees + "人，容量" + room.getCapacity() + "人");
@@ -121,12 +124,13 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setUserId(userId);
         int i = reservationMapper.create(reservation);
 
-        // 查找与时间段冲突且超过10分钟未签到的预约，将其状态改为"已占用"
+        // 查找与时间段冲突且超过宽限时间未签到的预约，将其状态改为"已占用"
         List<Reservation> conflictingUnattendedReservations =
                 reservationMapper.findConflictingUnattendedReservations(
                         dto.getRoomId(),
                         dto.getStartTime(),
-                        dto.getEndTime());
+                        dto.getEndTime(),
+                        graceMinutes);
 
         // 更新这些预约的状态为"已占用"
         for (Reservation oldReservation : conflictingUnattendedReservations) {
@@ -186,15 +190,19 @@ public class ReservationServiceImpl implements ReservationService {
             throw new BusinessException("账号因违约被封禁至 " + banStr + "，无法预约");
         }
 
+        // 获取签到宽限时间
+        int graceMinutes = getSignInGraceMinutes();
+
         // 检查容量
+        int attendees = dto.getAttendees() != null && dto.getAttendees() > 0 ? dto.getAttendees() : 1;
         Integer reservedAttendees = reservationMapper.getReservedAttendees(
-                dto.getRoomId(), startTime, endTime);
-        if (reservedAttendees + 1 > room.getCapacity()) {
+                dto.getRoomId(), startTime, endTime, graceMinutes);
+        if (reservedAttendees + attendees > room.getCapacity()) {
             throw new BusinessException("该时段已满员，已预约" + reservedAttendees + "人，容量" + room.getCapacity() + "人");
         }
 
         // 悲观锁冲突检测：SELECT FOR UPDATE 加行锁，高并发下只有一个请求能通过
-        if (reservationMapper.checkConflictForUpdate(dto.getRoomId(), startTime, endTime) > 0) {
+        if (reservationMapper.checkConflictForUpdate(dto.getRoomId(), startTime, endTime, graceMinutes) > 0) {
             throw new BusinessException("手速不够快！该时段已被他人抢占");
         }
 
@@ -217,7 +225,7 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setEndTime(endTime);
         reservation.setTitle(autoTitle);
         reservation.setPurpose("个人练习");
-        reservation.setAttendees(1);
+        reservation.setAttendees(attendees);
         reservation.setRemarks(dto.getRemarks() != null ? dto.getRemarks() : "");
         reservation.setStatus("approved");
 

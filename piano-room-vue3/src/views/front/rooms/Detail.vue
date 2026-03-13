@@ -283,6 +283,7 @@ function generateSlots(booked: any[]) {
   const now = dayjs()
   const startHour = settingsStore.basicSettings?.slotStartHour ?? 8
   const endHour = settingsStore.basicSettings?.slotEndHour ?? 22
+  const durationMinutes = settingsStore.basicSettings?.slotDurationMinutes ?? 120
   const currentUserId = authStore.user?.id
   let cur = dayjs(date).hour(startHour).minute(0)
   const end = dayjs(date).hour(endHour).minute(0)
@@ -292,7 +293,7 @@ function generateSlots(booked: any[]) {
   let idx = 0
   while (cur.isBefore(end)) {
     const next = sorted[idx]
-    const slotEnd = cur.add(2, 'hour')
+    const slotEnd = cur.add(durationMinutes, 'minute')
     const actualEnd = slotEnd.isAfter(end) ? end : slotEnd
 
     if (next && (cur.isSame(dayjs(next.isoStart)) || !cur.isBefore(dayjs(next.isoStart)))) {
@@ -328,7 +329,7 @@ function generateSlots(booked: any[]) {
 
     if (idx >= sorted.length && cur.isSame(actualEnd)) {
       while (cur.isBefore(end)) {
-        const sEnd = cur.add(2, 'hour')
+        const sEnd = cur.add(durationMinutes, 'minute')
         const aEnd = sEnd.isAfter(end) ? end : sEnd
         // 只要结束时间晚于当前时间，就显示为可预约
         const isEnded = aEnd.isBefore(now)

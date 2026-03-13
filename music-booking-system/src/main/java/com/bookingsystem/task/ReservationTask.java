@@ -35,20 +35,23 @@ public class ReservationTask {
         // 1. 处理结束时间已过的 approved 预约 → completed
         List<Reservation> completedList = reservationMapper.getApprovedReservations(now);
         for (Reservation r : completedList) {
+            // 再次检查状态，防止并发处理重复
+            Reservation current = reservationMapper.selectReservationsById(r.getId());
+            if (current == null || !"approved".equals(current.getStatus())) {
+                continue; // 已处理或不存在，跳过
+            }
+
             // 仅当已签到才标为 completed，否则标为 occupied（违约）
             if (r.getSignStartTime() != null) {
                 // 如果已签到但未签退，自动设置签退时间为预约结束时间
                 if (r.getSignEndTime() == null) {
                     r.setSignEndTime(r.getEndTime());
-                    log.info("[定时任务] 预约 {} 自动签退（预约时间结束）", r.getId());
                 }
                 r.setStatus("completed");
                 reservationMapper.update(r);
-                log.info("[定时任务] 预约 {} 已完成（已签到）", r.getId());
             } else {
                 r.setStatus("occupied");
                 reservationMapper.update(r);
-                log.info("[定时任务] 预约 {} 标记为违约（结束时未签到），对用户 {} 记录违约", r.getId(), r.getUserId());
                 penaltyService.recordViolation(r.getUserId());
             }
         }
