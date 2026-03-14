@@ -26,6 +26,13 @@ export interface ReservationSettings {
   maxNoShow: number
 }
 
+export interface PenaltyRule {
+  id: number
+  violationCount: number
+  banDays: number
+  description: string
+}
+
 export const useSettingsStore = defineStore('settings', () => {
   const basicSettings = ref<BasicSettings | null>(
     localStorage.getItem('basicSettings')
@@ -39,6 +46,12 @@ export const useSettingsStore = defineStore('settings', () => {
       : null
   )
 
+  const penaltyRules = ref<PenaltyRule[]>(
+    localStorage.getItem('penaltyRules')
+      ? JSON.parse(localStorage.getItem('penaltyRules')!)
+      : []
+  )
+
   function setBasicSettings(settings: BasicSettings) {
     basicSettings.value = settings
     localStorage.setItem('basicSettings', JSON.stringify(settings))
@@ -49,5 +62,17 @@ export const useSettingsStore = defineStore('settings', () => {
     localStorage.setItem('reservationSettings', JSON.stringify(settings))
   }
 
-  return { basicSettings, setBasicSettings, reservationSettings, setReservationSettings }
+  function setPenaltyRules(rules: PenaltyRule[]) {
+    penaltyRules.value = rules
+    localStorage.setItem('penaltyRules', JSON.stringify(rules))
+  }
+
+  return {
+    basicSettings,
+    setBasicSettings,
+    reservationSettings,
+    setReservationSettings,
+    penaltyRules,
+    setPenaltyRules,
+  }
 })

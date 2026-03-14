@@ -166,6 +166,25 @@ const steps = [
 const signInGrace = computed(() => settingsStore.reservationSettings?.signInGrace ?? 10)
 const maxNoShow = computed(() => settingsStore.reservationSettings?.maxNoShow ?? 3)
 
+// 动态生成违约说明，从后端获取的惩罚规则
+const penaltyItems = computed(() => {
+  const rules = settingsStore.penaltyRules
+  if (!rules || rules.length === 0) {
+    // 默认规则
+    return ['第 1 次违约：系统警告提示', '第 2 次违约：封禁 7 天', '第 3 次违约：封禁 30 天']
+  }
+  // 按违约次数排序并生成描述
+  return rules
+    .slice()
+    .sort((a, b) => a.violationCount - b.violationCount)
+    .map(rule => {
+      if (rule.banDays === 0) {
+        return `第 ${rule.violationCount} 次违约：${rule.description || '系统警告'}`
+      }
+      return `第 ${rule.violationCount} 次违约：封禁 ${rule.banDays} 天`
+    })
+})
+
 const rules = computed(() => [
   {
     icon: '📅',
@@ -180,7 +199,7 @@ const rules = computed(() => [
   {
     icon: '⚠️',
     title: '违约说明',
-    items: ['第 1 次违约：系统警告提示', `第 2 次违约：封禁 ${maxNoShow.value > 1 ? '7' : 'N'} 天`, `第 3 次违约：封禁 ${maxNoShow.value > 2 ? '30' : 'N'} 天`],
+    items: penaltyItems.value,
   },
 ])
 
@@ -210,9 +229,42 @@ async function loadHotRooms() {
   }
 }
 
+// 加载惩罚规则
+async function loadPenaltyRules() {
+  try {
+    const res = await request.get('/system/penalty-rules')
+    if (res?.code === 1 && res.data) {
+      settingsStore.setPenaltyRules(res.data)
+    }
+  } catch { /* 静默失败，使用默认值 */ }
+}
+
+// 加载所有设置
+async function loadAllSettings() {
+  try {
+    // 加载基础设置
+    const basicRes = await request.get('/system/settings/basic')
+    if (basicRes?.code === 1 && basicRes.data) {
+      settingsStore.setBasicSettings(basicRes.data)
+    }
+  } catch { /* 静默失败 */ }
+
+  try {
+    // 加载预约设置
+    const resvRes = await request.get('/system/settings/reservation')
+    if (resvRes?.code === 1 && resvRes.data) {
+      settingsStore.setReservationSettings(resvRes.data)
+    }
+  } catch { /* 静默失败 */ }
+
+  // 加载惩罚规则
+  await loadPenaltyRules()
+}
+
 onMounted(() => {
   loadBookingStatus()
   loadHotRooms()
+  loadAllSettings()
 })
 </script>
 

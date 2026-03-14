@@ -260,8 +260,14 @@ async function savePenaltyRule(row: any) {
       banDays: row.banDays,
       description: row.description,
     })
-    if (res?.code === 1) ElMessage.success('保存成功')
-    else ElMessage.error(res?.msg || '保存失败')
+    if (res?.code === 1) {
+      ElMessage.success('保存成功')
+      // 更新 store 中的惩罚规则，使前端其他页面同步
+      const updatedRules = penaltyRules.value.map(r =>
+        r.id === row.id ? { ...r, banDays: row.banDays, description: row.description } : r
+      )
+      settingsStore.setPenaltyRules(updatedRules)
+    } else ElMessage.error(res?.msg || '保存失败')
   } finally { row._saving = false }
 }
 

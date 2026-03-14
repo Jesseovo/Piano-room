@@ -186,6 +186,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useSettingsStore } from '@/stores/settings'
 import { useBreakpoints, breakpointsTailwind } from '@vueuse/core'
 import { useSound } from '@/composables/useSound'
+import request from '@/utils/request'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -203,8 +204,37 @@ function handleScroll() {
   isScrolled.value = window.scrollY > 10
 }
 
+// 刷新设置（从后端获取最新设置）
+async function refreshSettings() {
+  try {
+    // 加载基础设置
+    const basicRes = await request.get('/system/settings/basic')
+    if (basicRes?.code === 1 && basicRes.data) {
+      settingsStore.setBasicSettings(basicRes.data)
+    }
+  } catch { /* 静默失败 */ }
+
+  try {
+    // 加载预约设置
+    const resvRes = await request.get('/system/settings/reservation')
+    if (resvRes?.code === 1 && resvRes.data) {
+      settingsStore.setReservationSettings(resvRes.data)
+    }
+  } catch { /* 静默失败 */ }
+
+  try {
+    // 加载惩罚规则
+    const penaltyRes = await request.get('/system/penalty-rules')
+    if (penaltyRes?.code === 1 && penaltyRes.data) {
+      settingsStore.setPenaltyRules(penaltyRes.data)
+    }
+  } catch { /* 静默失败 */ }
+}
+
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
+  // 每次加载布局时刷新设置，确保数据同步
+  refreshSettings()
 })
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
