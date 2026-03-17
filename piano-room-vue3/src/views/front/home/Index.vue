@@ -319,7 +319,6 @@ onMounted(() => {
   color: var(--y2k-text);
   line-height: 1.3;
   margin-bottom: 16px;
-  text-shadow: 3px 3px 0px var(--y2k-accent-pink);
 }
 
 .hero-desc {
@@ -409,7 +408,6 @@ onMounted(() => {
   font-family: var(--y2k-font-pixel);
   font-size: 28px;
   color: var(--y2k-text);
-  text-shadow: 2px 2px 0 var(--y2k-accent-pink);
   line-height: 1.1;
 }
 
@@ -443,7 +441,6 @@ onMounted(() => {
   font-size: 22px;
   font-weight: 400;
   color: var(--y2k-text);
-  text-shadow: 2px 2px 0 var(--y2k-accent-pink);
   margin-bottom: 4px;
 }
 
@@ -501,7 +498,6 @@ onMounted(() => {
   font-size: 14px;
   font-weight: 400;
   color: var(--y2k-text);
-  text-shadow: 1px 1px 0 var(--y2k-accent-pink);
   margin-bottom: 8px;
 }
 
@@ -527,12 +523,10 @@ onMounted(() => {
   color: var(--y2k-accent-pink) !important;
   font-family: var(--y2k-font-pixel) !important;
   font-weight: 600 !important;
-  text-shadow: 0 0 2px rgba(255, 255, 255, 0.8), 1px 1px 0 rgba(0, 0, 0, 0.3) !important;
 }
 
 .book-link:hover {
   color: #ff69b4 !important;
-  text-shadow: 0 0 4px rgba(255, 105, 180, 0.6), 1px 1px 0 rgba(0, 0, 0, 0.3) !important;
 }
 
 /* ===== 预约流程 ===== */
@@ -588,7 +582,7 @@ onMounted(() => {
 .step-num-wrap.orange .step-num-txt { color: var(--y2k-text); }
 
 .step-icon { font-size: 28px; }
-.step-title { font-family: var(--y2k-font-pixel); font-size: 14px; font-weight: 400; color: var(--y2k-text); text-shadow: 1px 1px 0 var(--y2k-accent-pink); }
+.step-title { font-family: var(--y2k-font-pixel); font-size: 14px; font-weight: 400; color: var(--y2k-text); }
 .step-desc { font-size: 13px; color: var(--y2k-text-muted); line-height: 1.5; }
 
 /* ===== 使用须知 ===== */
@@ -613,7 +607,7 @@ onMounted(() => {
 }
 
 .notice-icon { font-size: 28px; margin-bottom: 12px; }
-.notice-title { font-family: var(--y2k-font-pixel); font-size: 15px; font-weight: 400; color: var(--y2k-text); margin-bottom: 12px; text-shadow: 1px 1px 0 var(--y2k-accent-pink); }
+.notice-title { font-family: var(--y2k-font-pixel); font-size: 15px; font-weight: 400; color: var(--y2k-text); margin-bottom: 12px; }
 .notice-list {
   list-style: none;
   display: flex;

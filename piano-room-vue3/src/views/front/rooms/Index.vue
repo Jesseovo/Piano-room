@@ -533,7 +533,6 @@ onMounted(() => loadRooms())
   font-size: 28px;
   font-weight: 400;
   color: var(--y2k-text);
-  text-shadow: 2px 2px 0px var(--y2k-accent-pink);
   margin-bottom: 6px;
 }
 
@@ -571,7 +570,6 @@ onMounted(() => loadRooms())
   padding: 12px 16px;
   border-bottom: 2px solid var(--y2k-border);
   background: var(--y2k-bg-dark);
-  text-shadow: 1px 1px 0px var(--y2k-accent-pink);
 }
 
 .y2k-filter-body {
@@ -765,7 +763,6 @@ onMounted(() => loadRooms())
 .room-icon {
   font-size: 28px;
   color: var(--y2k-accent-pink);
-  text-shadow: 2px 2px 0px var(--y2k-border);
   animation: y2k-float 3s ease-in-out infinite;
 }
 
@@ -797,7 +794,6 @@ onMounted(() => loadRooms())
   font-family: var(--y2k-font-pixel);
   font-size: 15px;
   color: var(--y2k-text);
-  text-shadow: 1px 1px 0px var(--y2k-accent-pink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -889,7 +885,6 @@ onMounted(() => loadRooms())
   padding: 12px 14px;
   border-bottom: 2px solid var(--y2k-border);
   border-right: 1px solid var(--y2k-border);
-  text-shadow: 1px 1px 0px var(--y2k-accent-pink);
   text-align: left;
 }
 
@@ -941,7 +936,6 @@ onMounted(() => loadRooms())
   font-family: var(--y2k-font-pixel);
   font-size: 18px;
   color: var(--y2k-text);
-  text-shadow: 2px 2px 0px var(--y2k-accent-pink);
 }
 
 .y2k-dialog-sub {
@@ -1084,7 +1078,6 @@ onMounted(() => loadRooms())
 
 .confirm-value.pink {
   color: var(--y2k-accent-pink);
-  text-shadow: 1px 1px 0px var(--y2k-border);
 }
 
 .confirm-tip {

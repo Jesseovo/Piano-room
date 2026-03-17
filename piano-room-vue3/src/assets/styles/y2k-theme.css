@@ -105,7 +105,6 @@ body::after {
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--y2k-text);
-  text-shadow: 2px 2px 0px var(--y2k-accent-pink);
   line-height: 1.2;
 }
 
@@ -113,21 +112,18 @@ body::after {
   font-family: var(--y2k-font-pixel);
   font-size: 18px;
   font-weight: 400;
-  text-shadow: 2px 2px 0px var(--y2k-accent-pink);
 }
 
 .y2k-heading-md {
   font-family: var(--y2k-font-pixel);
   font-size: 24px;
   font-weight: 400;
-  text-shadow: 2px 2px 0px var(--y2k-accent-pink);
 }
 
 .y2k-heading-lg {
   font-family: var(--y2k-font-pixel);
   font-size: 32px;
   font-weight: 400;
-  text-shadow: 3px 3px 0px var(--y2k-accent-pink);
 }
 
 /* ===== Y2K 按钮样式 ===== */
@@ -230,7 +226,6 @@ body::after {
   font-family: var(--y2k-font-pixel);
   font-size: 18px;
   color: var(--y2k-text);
-  text-shadow: 2px 2px 0px var(--y2k-accent-pink);
   padding-bottom: 12px;
   margin-bottom: 16px;
   border-bottom: var(--y2k-border-width) solid var(--y2k-border);
@@ -511,7 +506,6 @@ body::after {
   font-family: var(--y2k-font-pixel) !important;
   font-size: 16px !important;
   color: var(--y2k-text) !important;
-  text-shadow: 2px 2px 0px var(--y2k-accent-pink) !important;
   border-bottom: var(--y2k-border-width) solid var(--y2k-border) !important;
   padding: 16px 20px !important;
 }
@@ -584,7 +578,6 @@ body::after {
   font-family: var(--y2k-font-pixel) !important;
   font-size: 18px !important;
   color: var(--y2k-text) !important;
-  text-shadow: 2px 2px 0px var(--y2k-accent-pink) !important;
   border-bottom: var(--y2k-border-width) solid var(--y2k-border) !important;
   padding: 16px 20px !important;
 }
@@ -662,7 +655,6 @@ body::after {
 
 .el-breadcrumb__inner.is-link:hover {
   color: var(--y2k-accent-pink) !important;
-  text-shadow: 1px 1px 0px var(--y2k-shadow) !important;
 }
 
 /* 菜单覆盖 */
@@ -692,7 +684,6 @@ body::after {
 
 .el-tabs__item.is-active {
   color: var(--y2k-accent-pink) !important;
-  text-shadow: 1px 1px 0px var(--y2k-accent-pink) !important;
 }
 
 .el-tabs__active-bar {
@@ -728,5 +719,4 @@ body::after {
 .el-notification__title {
   font-family: var(--y2k-font-pixel) !important;
   color: var(--y2k-text) !important;
-  text-shadow: 1px 1px 0px var(--y2k-accent-pink) !important;
 }

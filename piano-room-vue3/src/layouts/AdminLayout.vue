@@ -223,7 +223,6 @@ function handleCommand(cmd: string) {
   font-size: 14px;
   font-weight: 400;
   color: white;
-  text-shadow: 2px 2px 0px var(--y2k-border);
   white-space: nowrap;
 }
 

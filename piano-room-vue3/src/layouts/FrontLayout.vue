@@ -327,7 +327,6 @@ function handleCommand(cmd: string) {
   font-size: 18px;
   font-weight: 400;
   color: var(--y2k-text);
-  text-shadow: 2px 2px 0px var(--y2k-accent-pink);
   white-space: nowrap;
 }
 
@@ -520,7 +519,6 @@ function handleCommand(cmd: string) {
   font-family: var(--y2k-font-pixel);
   font-size: 16px;
   color: var(--y2k-text);
-  text-shadow: 2px 2px 0px var(--y2k-accent-pink);
 }
 
 .footer-links {

@@ -132,7 +132,6 @@ onMounted(() => {
   font-family: var(--y2k-font-pixel);
   font-size: 24px;
   color: var(--y2k-accent-pink);
-  text-shadow: 2px 2px 0px var(--y2k-border);
   z-index: 9998;
   pointer-events: none;
   animation: y2k-float 3s ease-in-out infinite;

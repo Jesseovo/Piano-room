@@ -324,14 +324,12 @@ onMounted(() => {
   font-size: 20px;
   font-weight: 400;
   color: white;
-  text-shadow: 3px 3px 0px var(--y2k-border);
 }
 
 .logo-blink {
   font-family: var(--y2k-font-pixel);
   font-size: 20px;
   color: var(--y2k-accent-yellow);
-  text-shadow: 2px 2px 0px var(--y2k-border);
 }
 
 .banner-title {
@@ -344,7 +342,6 @@ onMounted(() => {
   font-size: 36px;
   font-weight: 400;
   color: white;
-  text-shadow: 3px 3px 0px var(--y2k-border);
   line-height: 1.3;
 }
 
@@ -361,7 +358,6 @@ onMounted(() => {
   color: white;
   font-family: var(--y2k-font-pixel);
   font-size: 14px;
-  text-shadow: 2px 2px 0px var(--y2k-border);
 }
 
 .feature-icon {
@@ -585,7 +581,6 @@ onMounted(() => {
 
 .y2k-link:hover {
   color: var(--y2k-accent-pink);
-  text-shadow: 1px 1px 0px var(--y2k-shadow);
 }
 
 .y2k-link-bold {
