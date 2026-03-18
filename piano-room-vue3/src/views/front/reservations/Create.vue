@@ -327,12 +327,12 @@ async function handleSubmit() {
       } else {
         const msg = res?.msg || '预约失败，请稍后重试'
         conflictMsg.value = msg
-        ElMessage.error(msg)
+        // 错误已在拦截器中提示，这里只更新UI状态
       }
     } catch (error: any) {
       const msg = error?.response?.data?.msg || error?.message || '网络异常，请稍后重试'
       conflictMsg.value = msg
-      ElMessage.error(msg)
+      // 错误已在拦截器中提示，这里只更新UI状态
     } finally {
       submitting.value = false
     }

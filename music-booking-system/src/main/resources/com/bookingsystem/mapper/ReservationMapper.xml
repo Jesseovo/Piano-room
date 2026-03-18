@@ -238,6 +238,67 @@
         where re.status = 'approved' and re.end_time &lt;= #{now}
         order by re.created_at desc
     </select>
+
+    <!-- 获取超过签到宽限期仍未签到的预约记录 -->
+    <select id="getOverdueReservations" resultType="com.bookingsystem.pojo.Reservation">
+        SELECT
+        re.id,
+        re.user_id,
+        re.room_id,
+        re.title,
+        re.purpose,
+        re.start_time,
+        re.end_time,
+        re.attendees,
+        re.status,
+        re.remarks,
+        re.reviewer_id,
+        re.review_time,
+        re.review_remarks,
+        re.created_at,
+        re.updated_at,
+        re.sign_start_time,
+        re.sign_end_time,
+        rooms.name as room_name,u.username as username
+        FROM reservations re
+        LEFT JOIN rooms on re.room_id = rooms.id
+        LEFT JOIN users u on  re.user_id = u.id
+        WHERE re.status = 'approved'
+          AND re.sign_start_time IS NULL  <!-- 未签到 -->
+          AND TIMESTAMPADD(MINUTE, #{graceMinutes}, re.start_time) &lt;= #{now}  <!-- 超过签到宽限期 -->
+        ORDER BY re.created_at DESC
+    </select>
+
+    <!-- 获取已签到但超过结束时间的预约记录 -->
+    <select id="getCompletedReservations" resultType="com.bookingsystem.pojo.Reservation">
+        SELECT
+        re.id,
+        re.user_id,
+        re.room_id,
+        re.title,
+        re.purpose,
+        re.start_time,
+        re.end_time,
+        re.attendees,
+        re.status,
+        re.remarks,
+        re.reviewer_id,
+        re.review_time,
+        re.review_remarks,
+        re.created_at,
+        re.updated_at,
+        re.sign_start_time,
+        re.sign_end_time,
+        rooms.name as room_name,u.username as username
+        FROM reservations re
+        LEFT JOIN rooms on re.room_id = rooms.id
+        LEFT JOIN users u on  re.user_id = u.id
+        WHERE re.status = 'approved'
+          AND re.sign_start_time IS NOT NULL  <!-- 已签到 -->
+          AND re.end_time &lt;= #{now}  <!-- 超过结束时间 -->
+        ORDER BY re.created_at DESC
+    </select>
+
     <select id="getUserReservationStats" resultType="com.bookingsystem.vo.UserReservationStatsVO">
         SELECT
             COUNT(*) AS totalCount,

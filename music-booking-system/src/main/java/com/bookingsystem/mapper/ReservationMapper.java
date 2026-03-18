@@ -233,6 +233,12 @@ public interface ReservationMapper {
     // 获取已批准且当前时间超过预约结束时间的预约记录
     List<Reservation> getApprovedReservations(LocalDateTime now);
 
+    // 获取超过签到宽限期仍未签到的预约记录
+    List<Reservation> getOverdueReservations(@Param("now") LocalDateTime now, @Param("graceMinutes") int graceMinutes);
+
+    // 获取已签到但超过结束时间的预约记录
+    List<Reservation> getCompletedReservations(@Param("now") LocalDateTime now);
+
     UserReservationStatsVO getUserReservationStats(@Param("userId") Long userId);
 
     /**
