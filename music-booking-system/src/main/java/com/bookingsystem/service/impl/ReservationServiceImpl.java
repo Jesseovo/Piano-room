@@ -13,6 +13,7 @@ import com.bookingsystem.mapper.RoomMapper;
 import com.bookingsystem.mapper.UserMapper;
 import com.bookingsystem.pojo.*;
 import com.bookingsystem.qo.AvailableRoomQO;
+import com.bookingsystem.service.PenaltyService;
 import com.bookingsystem.service.ReservationService;
 import com.bookingsystem.utils.LocationUtil;
 import com.bookingsystem.vo.PracticeDurationVO;
@@ -43,6 +44,8 @@ public class ReservationServiceImpl implements ReservationService {
     private UserMapper userMapper;
     @Autowired
     private InMemoryDataStore inMemoryDataStore;
+    @Autowired
+    private PenaltyService penaltyService;
 
     /**
      * 获取最大提前预约天数（从系统配置读取，默认7天）
@@ -80,6 +83,7 @@ public class ReservationServiceImpl implements ReservationService {
         return 10; // 默认10分钟
     }
 
+
     // 获取某天已预约时段
     @Override
     public List<TimeSlot> getRoomAvailability(AvaDTO dto) {
@@ -106,12 +110,12 @@ public class ReservationServiceImpl implements ReservationService {
         if (room == null) {
             throw new Exception("琴房不存在");
         }
-        
+
         // 检查琴房是否设置了地理位置信息，如果没有设置则不允许预约（因为无法进行位置验证签到）
         if (room.getLatitude() == null || room.getLongitude() == null) {
             throw new Exception("该琴房未设置地理位置信息，无法预约（需要进行位置验证签到）");
         }
-        
+
         Integer reservedAttendees = reservationMapper.getReservedAttendees(
                 dto.getRoomId(), dto.getStartTime(), dto.getEndTime(), graceMinutes);
         int newAttendees = dto.getAttendees() != null ? dto.getAttendees() : 1;
@@ -340,14 +344,42 @@ public class ReservationServiceImpl implements ReservationService {
         LocalDateTime endTime = reservation.getEndTime();
         int signInGrace = getSignInGraceMinutes();
 
-        // 已签到不可重复签到
+        // 检查是否在可签到时间内（预约结束前都可以签到）
+        if (now.isAfter(endTime)) {
+            return Result.error("预约已结束，无法签到");
+        }
+
+        // 检查预约状态是否为已违约
+        if ("occupied".equals(reservation.getStatus())) {
+            return Result.error("预约已因超时未签到被标记为违约，无法签到");
+        }
+
+        // 检查是否已经签到
         if (reservation.getSignStartTime() != null) {
             return Result.error("已签到");
         }
 
-        // 检查是否在可签到时间内（预约结束前都可以签到）
-        if (now.isAfter(endTime)) {
-            return Result.error("预约已结束，无法签到");
+        // 实时检查：如果已经超过签到宽限时间，不允许签到并标记为违约
+        // 需要考虑预约创建时间：如果预约是在时间段开始后创建的，应以预约创建时间为基准
+        LocalDateTime allowedSignInTime;
+        if (reservation.getCreatedAt().isAfter(startTime)) {
+            // 预约是在时间段开始后创建的，以预约创建时间为基准
+            allowedSignInTime = reservation.getCreatedAt().plusMinutes(signInGrace);
+        } else {
+            // 预约是在时间段开始前创建的，以时间段开始时间为基准
+            allowedSignInTime = startTime.plusMinutes(signInGrace);
+        }
+
+        if (now.isAfter(allowedSignInTime)) {
+            // 检查是否已经被其他任务标记为违约
+            if ("approved".equals(reservation.getStatus())) {
+                // 实时标记为违约
+                reservation.setStatus("occupied");
+                reservationMapper.update(reservation);
+                // 记录违约
+                penaltyService.recordViolation(reservation.getUserId());
+            }
+            return Result.error("已超过签到宽限时间，预约已标记为违约");
         }
 
         // 位置验证（必须提供位置信息且在范围内）
@@ -391,13 +423,6 @@ public class ReservationServiceImpl implements ReservationService {
                     reservation.getUserId(), reservation.getRoomId(), other.getId());
         }
 
-        // 检查是否超过开始时间宽限期
-        LocalDateTime allowedSignInTime = startTime.plusMinutes(signInGrace);
-        if (now.isAfter(allowedSignInTime)) {
-            // 超时签到，但记录签到时间
-            return Result.successMsg("超时签到" + (otherReservations.isEmpty() ? "" : "，已自动取消其他预约"));
-        }
-
         // 正常签到
         return Result.successMsg("签到成功" + (otherReservations.isEmpty() ? "" : "，已自动取消其他预约"));
     }
@@ -427,9 +452,9 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     private void validateReservation(ReservationDTO dto) {
-        //验证预约时间是否在当前时间之前
-        if (dto.getStartTime().isBefore(LocalDateTime.now())) {
-            throw new BusinessException("开始时间不能早于当前时间");
+        // 验证结束时间是否在当前时间之前
+        if (dto.getEndTime().isBefore(LocalDateTime.now())) {
+            throw new BusinessException("结束时间不能早于当前时间");
         }
         // 验证时间有效性
         if (dto.getStartTime().isAfter(dto.getEndTime())) {

@@ -1,9 +1,13 @@
 package com.bookingsystem.utils;
 
+import com.alibaba.fastjson2.JSON;
+import com.bookingsystem.config.InMemoryDataStore;
+import com.bookingsystem.pojo.SecuritySetting;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -19,8 +23,8 @@ public class JwtUtil {
     @Value("${jwt.secret:defaultSecretKeyWhichShouldBeVeryLongForSecurity}")
     private String secret;
 
-    @Value("${jwt.expiration:86400000}") // 默认24小时
-    private long expiration;
+    @Autowired
+    private InMemoryDataStore inMemoryDataStore;
 
     // 生成密钥
     private Key getSigningKey() {
@@ -64,13 +68,32 @@ public class JwtUtil {
         return createToken(claims, username);
     }
 
+    /**
+     * 获取token过期时间（毫秒）
+     */
+    private long getTokenExpirationMs() {
+        String setting = inMemoryDataStore.get("securitySetting");
+        if (setting != null) {
+            try {
+                SecuritySetting securitySetting = JSON.parseObject(setting, SecuritySetting.class);
+                if (securitySetting != null && securitySetting.getTokenExpireHours() != null) {
+                    return (long) securitySetting.getTokenExpireHours() * 60 * 60 * 1000; // 转换为毫秒
+                }
+            } catch (Exception e) {
+                // 解析失败使用默认值
+            }
+        }
+        return 24L * 60 * 60 * 1000; // 默认24小时（毫秒）
+    }
+
     // 创建token
     private String createToken(Map<String, Object> claims, String subject) {
+        long expirationMs = getTokenExpirationMs();
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

@@ -7,8 +7,11 @@ import com.bookingsystem.dto.UserLoginDTO;
 import com.bookingsystem.dto.UserQueryDTO;
 import com.bookingsystem.exception.BusinessException;
 import com.bookingsystem.mapper.UserMapper;
+import com.alibaba.fastjson2.JSON;
+import com.bookingsystem.config.InMemoryDataStore;
 import com.bookingsystem.pojo.PageResult;
 import com.bookingsystem.pojo.Result;
+import com.bookingsystem.pojo.SecuritySetting;
 import com.bookingsystem.pojo.User;
 import com.bookingsystem.service.EmailService;
 import com.bookingsystem.service.UserService;
@@ -67,6 +70,13 @@ public class UserServiceImpl implements UserService {
         if(!resetPasswordDTO.getNewPassword().equals(resetPasswordDTO.getAgainPassword())){
             throw new BusinessException("两次密码不一致");
         }
+        
+        // 校验新密码长度
+        int minPasswordLength = getMinPasswordLength();
+        if (resetPasswordDTO.getNewPassword().length() < minPasswordLength) {
+            throw new BusinessException("密码长度不能少于" + minPasswordLength + "位");
+        }
+        
         String newPassword = Md5Util.getMD5String(resetPasswordDTO.getNewPassword());
         userMapper.resetPassword(resetPasswordDTO.getId(), newPassword);
     }
@@ -151,24 +161,51 @@ public class UserServiceImpl implements UserService {
         userMapper.update(user);
     }
 
+    @Autowired
+    private InMemoryDataStore inMemoryDataStore;
+
+    /**
+     * 获取最小密码长度（从系统配置读取，默认6位）
+     */
+    private int getMinPasswordLength() {
+        String setting = inMemoryDataStore.get("securitySetting");
+        if (setting != null) {
+            try {
+                SecuritySetting securitySetting = JSON.parseObject(setting, SecuritySetting.class);
+                if (securitySetting != null && securitySetting.getMinPasswordLength() != null) {
+                    return securitySetting.getMinPasswordLength();
+                }
+            } catch (Exception e) {
+                // 解析失败使用默认值
+            }
+        }
+        return 6; // 默认6位
+    }
+
     @Override
     public void addUser(User user) {
         // 校验用户名是否已存在
         if (userMapper.selectByUsername(user.getUsername()) != null) {
             throw new BusinessException("用户名已被注册");
         }
-        
+
         // 校验必填字段
         if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
             throw new BusinessException("密码不能为空");
         }
-        
+
+        // 校验密码长度
+        int minPasswordLength = getMinPasswordLength();
+        if (user.getPassword().length() < minPasswordLength) {
+            throw new BusinessException("密码长度不能少于" + minPasswordLength + "位");
+        }
+
         // 设置默认值
         user.setPassword(Md5Util.getMD5String(user.getPassword())); // 加密密码
         user.setStatus(Constants.ONE); // 默认启用
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
-        
+
         userMapper.insert(user);
     }
 
@@ -195,6 +232,12 @@ public class UserServiceImpl implements UserService {
         //校验用户名
         String username = registerInfoDTO.getUsername();
         if (userMapper.selectByUsername(username) != null) throw new BusinessException("用户名已被注册");
+
+        // 校验密码长度
+        int minPasswordLength = getMinPasswordLength();
+        if (registerInfoDTO.getPassword().length() < minPasswordLength) {
+            throw new BusinessException("密码长度不能少于" + minPasswordLength + "位");
+        }
 
         User user = new User();
         user.setUsername(username);

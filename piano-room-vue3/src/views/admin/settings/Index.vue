@@ -54,10 +54,6 @@
               <el-input-number v-model="reservationForm.signInGrace" :min="5" :max="60" style="width:120px" />
               <span class="unit">分钟</span>
             </el-form-item>
-            <el-form-item label="最大爽约次数">
-              <el-input-number v-model="reservationForm.maxNoShow" :min="1" :max="10" style="width:120px" />
-              <span class="unit">次</span>
-            </el-form-item>
             <el-form-item>
               <el-button type="primary" :loading="saving" @click="saveReservation">保存</el-button>
             </el-form-item>
@@ -228,11 +224,21 @@ async function saveBasic() {
 async function saveReservation() {
   saving.value = true
   try {
-    const res = await request.post('/system/settings/reservation', reservationForm)
+    // 创建一个副本，排除maxNoShow字段
+    const settingsToSend = { ...reservationForm }
+    delete settingsToSend.maxNoShow
+    
+    const res = await request.post('/system/settings/reservation', settingsToSend)
     if (res?.code === 1) {
-      settingsStore.setReservationSettings({ ...reservationForm })
+      // 从响应中获取实际保存的数据更新到store
+      const savedSettings = await request.get('/system/settings/reservation')
+      if (savedSettings?.code === 1) {
+        settingsStore.setReservationSettings(savedSettings.data)
+      }
       ElMessage.success('保存成功')
     } else ElMessage.error(res?.msg || '保存失败')
+  } catch (error) {
+    ElMessage.error(error.message || '保存失败')
   } finally { saving.value = false }
 }
 

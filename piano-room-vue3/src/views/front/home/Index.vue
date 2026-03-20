@@ -164,7 +164,6 @@ const steps = [
 ]
 
 const signInGrace = computed(() => settingsStore.reservationSettings?.signInGrace ?? 10)
-const maxNoShow = computed(() => settingsStore.reservationSettings?.maxNoShow ?? 3)
 
 // 动态生成违约说明，从后端获取的惩罚规则
 const penaltyItems = computed(() => {
@@ -179,7 +178,20 @@ const penaltyItems = computed(() => {
     .sort((a, b) => a.violationCount - b.violationCount)
     .map(rule => {
       if (rule.banDays === 0) {
-        return `第 ${rule.violationCount} 次违约：${rule.description || '系统警告'}`
+        // 防止重复显示违约次数，如果描述中已经包含违约相关信息，则不添加前缀
+        let description = rule.description || '系统警告'
+        
+        // 移除描述中可能存在的"第X次违约："前缀，避免重复
+        if (description.startsWith(`第${rule.violationCount}次违约：`)) {
+          // 如果描述以"第X次违约："开头（没有空格），提取后面的内容
+          description = description.substring(`第${rule.violationCount}次违约：`.length)
+        } else if (description.startsWith(`第 ${rule.violationCount} 次违约：`)) {
+          // 如果描述以"第 X 次违约："开头（有空格），提取后面的内容
+          description = description.substring(`第 ${rule.violationCount} 次违约：`.length)
+        }
+        
+        // 添加标准格式的违约信息前缀
+        return `第 ${rule.violationCount} 次违约：${description}`
       }
       return `第 ${rule.violationCount} 次违约：封禁 ${rule.banDays} 天`
     })
