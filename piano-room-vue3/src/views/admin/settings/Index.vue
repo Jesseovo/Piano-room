@@ -225,8 +225,7 @@ async function saveReservation() {
   saving.value = true
   try {
     // 创建一个副本，排除maxNoShow字段
-    const settingsToSend = { ...reservationForm }
-    delete settingsToSend.maxNoShow
+    const { maxNoShow, ...settingsToSend } = reservationForm
     
     const res = await request.post('/system/settings/reservation', settingsToSend)
     if (res?.code === 1) {
@@ -237,7 +236,7 @@ async function saveReservation() {
       }
       ElMessage.success('保存成功')
     } else ElMessage.error(res?.msg || '保存失败')
-  } catch (error) {
+  } catch (error: any) {
     ElMessage.error(error.message || '保存失败')
   } finally { saving.value = false }
 }
