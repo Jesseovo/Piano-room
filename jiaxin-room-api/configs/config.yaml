@@ -1,0 +1,40 @@
+server:
+  port: 8099
+  mode: debug # debug / release
+
+database:
+  host: ${DB_HOST:localhost}
+  port: ${DB_PORT:3306}
+  name: ${DB_NAME:classroombookingdb}
+  user: ${DB_USER:root}
+  password: ${DB_PASSWORD:123456}
+  max_idle_conns: 10
+  max_open_conns: 100
+
+redis:
+  host: ${REDIS_HOST:localhost}
+  port: ${REDIS_PORT:6379}
+  password: ${REDIS_PASSWORD:}
+  db: 0
+
+jwt:
+  secret: ${JWT_SECRET:jiaxin-room-secret-key-2026}
+  expire_hours: 24
+
+mail:
+  host: smtp.163.com
+  port: 25
+  username: ${MAIL_USERNAME:}
+  password: ${MAIL_PASSWORD:}
+
+oss:
+  endpoint: ${OSS_ENDPOINT:}
+  access_key_id: ${OSS_ACCESS_KEY_ID:}
+  access_key_secret: ${OSS_ACCESS_KEY_SECRET:}
+  bucket_name: ${OSS_BUCKET_NAME:}
+
+cors:
+  allowed_origins:
+    - http://localhost:3000
+    - http://localhost:5173
+    - http://127.0.0.1:3000

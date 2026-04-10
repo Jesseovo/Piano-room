@@ -1,19 +1,16 @@
 # 日志文件
 *.log
 *.log.*
-logs/
 
 # 构建产物
 target/
 node_modules/
 dist/
 dist-ssr/
+.next/
 
-# Nginx 运行时目录 & 二进制（只保留 conf/ contrib/ docs/）
-nginx-1.28.0/logs/
-nginx-1.28.0/html/
-nginx-1.28.0/temp/
-nginx-1.28.0/nginx.exe
+# Go 构建
+jiaxin-room-api/tmp/
 
 # IDE / 编辑器
 .idea/
@@ -31,3 +28,7 @@ nginx-1.28.0/nginx.exe
 *.iml
 *.iws
 *.ipr
+
+# 环境变量
+.env
+.env.production

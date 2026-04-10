@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+/*
+ * 夹心 Room -- Figma x Apple Fusion Design System
+ * Apple: extreme whitespace, SF Pro, multi-layer shadows, frosted glass
+ * Figma: vibrant multi-color, playful yet professional, collaboration-feel
+ */
+
+@theme {
+  /* ===== Apple-inspired Core Palette ===== */
+  --color-primary: #0071E3;
+  --color-primary-hover: #0077ED;
+  --color-primary-active: #006EDB;
+  --color-primary-light: #E8F4FD;
+  --color-primary-pale: #F5F9FF;
+
+  /* Figma-inspired Accent Palette */
+  --color-accent-green: #34C759;
+  --color-accent-orange: #FF9500;
+  --color-accent-red: #FF3B30;
+  --color-accent-purple: #AF52DE;
+  --color-accent-teal: #5AC8FA;
+  --color-accent-pink: #FF2D55;
+  --color-accent-yellow: #FFCC00;
+
+  /* Neutral Scale (Apple style) */
+  --color-bg: #FFFFFF;
+  --color-bg-secondary: #F5F5F7;
+  --color-bg-tertiary: #FAFAFA;
+  --color-surface: #FFFFFF;
+  --color-surface-raised: #FFFFFF;
+
+  --color-text: #1D1D1F;
+  --color-text-secondary: #6E6E73;
+  --color-text-tertiary: #86868B;
+  --color-text-quaternary: #AEAEB2;
+
+  --color-border: #D2D2D7;
+  --color-border-light: #E8E8ED;
+  --color-divider: #F0F0F0;
+
+  /* Status */
+  --color-success: #34C759;
+  --color-success-bg: #E8FAF0;
+  --color-warning: #FF9500;
+  --color-warning-bg: #FFF4E6;
+  --color-danger: #FF3B30;
+  --color-danger-bg: #FFEBE9;
+  --color-info: #5AC8FA;
+  --color-info-bg: #E8F7FF;
+
+  /* Layout */
+  --header-height: 52px;
+  --mobile-nav-height: 56px;
+
+  /* Radius (Apple-style generous rounding) */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows (Apple multi-layer approach) */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.06), 0 4px 10px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.10);
+  --shadow-primary: 0 4px 14px rgba(0, 113, 227, 0.3);
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  --font-mono: "SF Mono", "Fira Code", "JetBrains Mono", monospace;
+
+  /* Animation */
+  --ease-spring: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+}
+
+/* ===== Global Resets ===== */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  line-height: 1.6;
+}
+
+/* ===== Scrollbar (subtle, Apple-style) ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ===== Selection ===== */
+::selection {
+  background: rgba(0, 113, 227, 0.15);
+  color: var(--color-text);
+}
+
+/* ===== Focus Ring (Apple-style) ===== */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ===== Frosted Glass Utility ===== */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+.glass-dark {
+  background: rgba(29, 29, 31, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* ===== Page Transitions ===== */
+.page-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--duration-normal) var(--ease-spring),
+              transform var(--duration-normal) var(--ease-spring);
+}
+
+/* ===== Mobile Safe Areas ===== */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* ===== Responsive Container ===== */
+.container-app {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .container-app {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
