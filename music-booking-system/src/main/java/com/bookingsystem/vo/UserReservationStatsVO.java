@@ -8,9 +8,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserReservationStatsVO {
-    private Integer totalCount;        // 总预约次数
-    private Integer completedCount;    // 已完成
-    private Integer approvedCount;     // 进行中（已预约）
-    private Integer cancelledCount;    // 已取消
-    private Integer occupiedCount;     // 违约次数
+    private Integer totalCount;
+    private Integer completedCount;
+    private Integer approvedCount;
+    private Integer cancelledCount;
+    private Integer occupiedCount;
+    private Long totalPracticeMinutes;
 }

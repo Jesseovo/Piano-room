@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @AllArgsConstructor
@@ -29,29 +31,16 @@ public class Reservation {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime signStartTime; // 签到时间
+    private LocalDateTime signStartTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime signEndTime;   // 签退时间
+    private LocalDateTime signEndTime;
+    private LocalDate legacyDate;
+    private LocalTime legacyStartTime;
+    private LocalTime legacyEndTime;
+    private Integer duration;
 
-    /**
-     * 拓展字段
-     */
     private String roomName;
-
-
-    /**
-     * 拓展字段
-     */
     private String username;
-
-    /**
-     * 拓展字段教室位置
-     */
     private String roomLocation;
-
-    /**
-     * 拓展字段联系方式
-     */
     private String phone;
-
 }

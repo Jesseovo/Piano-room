@@ -164,7 +164,7 @@
     <el-dialog
       v-model="slotDialogVisible"
       :title="''"
-      width="480px"
+      :width="isMobile ? '92%' : '480px'"
       :close-on-click-modal="false"
       class="y2k-dialog"
     >
@@ -231,7 +231,7 @@
     <el-dialog
       v-model="confirmDialogVisible"
       title=""
-      width="420px"
+      :width="isMobile ? '92%' : '420px'"
       :close-on-click-modal="false"
       class="y2k-dialog"
     >
@@ -281,6 +281,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
+import { useBreakpoints, breakpointsTailwind } from '@vueuse/core'
 import { useAuthStore } from '@/stores/auth'
 import { useSettingsStore } from '@/stores/settings'
 import { useRouter } from 'vue-router'
@@ -290,6 +291,8 @@ import { reservationApi } from '@/api/reservation'
 const router = useRouter()
 const authStore = useAuthStore()
 const settingsStore = useSettingsStore()
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const isMobile = breakpoints.smaller('md')
 
 const loading = ref(false)
 const rooms = ref<any[]>([])
@@ -1175,10 +1178,112 @@ onMounted(() => loadRooms())
 }
 
 @media (max-width: 768px) {
-  .content-layout { flex-direction: column; }
+  .content-layout {
+    flex-direction: column;
+    align-items: stretch;
+  }
   .filter-sidebar { width: 100%; position: static; }
-  .rooms-card-grid { grid-template-columns: 1fr; }
+  .rooms-main { width: 100%; }
+  .page-head { margin-bottom: 20px; }
+  .y2k-page-title { font-size: 22px; }
+  .y2k-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .rooms-count { text-align: center; }
+  .view-switch { width: 100%; }
+  .y2k-view-btn { flex: 1; }
+  .rooms-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
   .skeleton-grid { grid-template-columns: 1fr; }
+  .y2k-room-card {
+    width: 100%;
+    min-width: 0;
+  }
+  .y2k-card-head {
+    gap: 12px;
+    padding: 12px;
+  }
+  .y2k-status-badge {
+    flex-shrink: 0;
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+  .room-icon { font-size: 24px; }
+  .y2k-card-body {
+    padding: 12px;
+    gap: 8px;
+  }
+  .y2k-room-name {
+    font-size: 14px;
+    white-space: normal;
+    line-height: 1.45;
+  }
+  .y2k-room-meta { flex-wrap: wrap; gap: 8px; }
+  .y2k-facility-chip {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  .y2k-card-footer {
+    padding: 10px 12px;
+  }
+  .y2k-book-btn {
+    font-size: 12px;
+    padding: 9px 8px;
+  }
+  .slot-date-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .slot-date-row :deep(.el-input),
+  .slot-date-row :deep(.el-date-editor.el-input) {
+    width: 100% !important;
+  }
+  .confirm-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .confirm-label { min-width: 0; }
   .dialog-slot-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .page-head { margin-bottom: 16px; }
+  .rooms-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .y2k-card-head {
+    padding: 10px;
+  }
+
+  .y2k-card-body,
+  .y2k-card-footer {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .y2k-room-meta {
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .y2k-book-btn {
+    font-size: 11px;
+  }
+  .dialog-slot-grid { grid-template-columns: 1fr; }
+  .y2k-table { min-width: 560px; }
+}
+
+@media (max-width: 380px) {
+  .rooms-card-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

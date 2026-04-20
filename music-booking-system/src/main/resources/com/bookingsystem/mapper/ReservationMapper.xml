@@ -305,7 +305,14 @@
             SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completedCount,
             SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approvedCount,
             SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) AS cancelledCount,
-            SUM(CASE WHEN status = 'occupied' THEN 1 ELSE 0 END) AS occupiedCount
+            SUM(CASE WHEN status = 'occupied' THEN 1 ELSE 0 END) AS occupiedCount,
+            COALESCE(SUM(
+                CASE
+                    WHEN sign_start_time IS NOT NULL AND sign_end_time IS NOT NULL
+                    THEN TIMESTAMPDIFF(MINUTE, sign_start_time, sign_end_time)
+                    ELSE 0
+                END
+            ), 0) AS totalPracticeMinutes
         FROM reservations
         WHERE user_id = #{userId}
     </select>
@@ -351,6 +358,51 @@
             </if>
         </where>
         ORDER BY re.created_at DESC
+    </select>
+
+    <select id="listPracticeDurationSummary" resultType="com.bookingsystem.vo.PracticeDurationSummaryVO">
+        SELECT
+            u.id as userId,
+            u.username,
+            u.real_name as realName,
+            u.student_id as studentId,
+            u.phone,
+            u.grade,
+            u.major,
+            COUNT(re.id) as practiceCount,
+            COALESCE(SUM(TIMESTAMPDIFF(MINUTE, re.sign_start_time, re.sign_end_time)), 0) as totalPracticeMinutes,
+            MAX(re.sign_end_time) as lastPracticeTime
+        FROM users u
+        LEFT JOIN reservations re ON re.user_id = u.id
+            AND re.sign_start_time IS NOT NULL
+            AND re.sign_end_time IS NOT NULL
+            <if test="userId != null and userId != ''">
+                AND re.user_id = #{userId}
+            </if>
+            <if test="status != null and status != ''">
+                AND re.status = #{status}
+            </if>
+            <if test="startTime != null">
+                AND re.start_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND re.end_time &lt;= #{endTime}
+            </if>
+            <if test="roomId != null and roomId != ''">
+                AND re.room_id = #{roomId}
+            </if>
+        LEFT JOIN rooms ON re.room_id = rooms.id
+        <where>
+            u.user_type = 'student'
+            <if test="roomName != null and roomName != ''">
+                AND rooms.name LIKE CONCAT('%', #{roomName}, '%')
+            </if>
+            <if test="username != null and username != ''">
+                AND u.username LIKE CONCAT('%', #{username}, '%')
+            </if>
+        </where>
+        GROUP BY u.id, u.username, u.real_name, u.student_id, u.phone, u.grade, u.major
+        ORDER BY totalPracticeMinutes DESC, lastPracticeTime DESC
     </select>
 
 </mapper>

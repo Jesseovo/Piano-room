@@ -1,5 +1,7 @@
 package com.bookingsystem.controller;
 
+import com.bookingsystem.annotation.PublicAccess;
+import com.bookingsystem.annotation.RequireRoles;
 import com.bookingsystem.pojo.ClassType;
 import com.bookingsystem.pojo.Result;
 import com.bookingsystem.service.ClassTypeService;
@@ -17,9 +19,7 @@ public class ClassTypeController {
     @Autowired
     private ClassTypeService classTypeService;
 
-
-
-
+    @PublicAccess
     @GetMapping("/all")
     public Result getAll(){
       List<ClassType> res =   classTypeService.list();
@@ -31,6 +31,7 @@ public class ClassTypeController {
      * @param classType
      * @return
      */
+    @RequireRoles({"admin", "super_admin"})
     @PostMapping
     public Result addClassType(@RequestBody ClassType classType) {
         boolean success = classTypeService.addClassType(classType);
@@ -42,6 +43,7 @@ public class ClassTypeController {
      * @param id
      * @return
      */
+    @RequireRoles({"admin", "super_admin"})
     @DeleteMapping("/{id}")
     public Result deleteClassType(@PathVariable Long id) {
         boolean success = classTypeService.deleteClassType(id);
@@ -54,6 +56,7 @@ public class ClassTypeController {
      * @param classType
      * @return
      */
+    @RequireRoles({"admin", "super_admin"})
     @PutMapping("/{id}")
     public Result updateClassType(@PathVariable Long id, @RequestBody ClassType classType) {
         boolean success = classTypeService.updateClassType(id, classType);
@@ -64,6 +67,7 @@ public class ClassTypeController {
      * 获取所有教室类型
      * @return
      */
+    @PublicAccess
     @GetMapping
     public Result getAllClassTypes(@RequestParam(defaultValue = "1") Integer pageNum,
                                    @RequestParam (defaultValue = "10") Integer pageSize,
@@ -76,6 +80,7 @@ public class ClassTypeController {
      * @param id
      * @return
      */
+    @PublicAccess
     @GetMapping("/{id}")
     public Result getClassTypeById(@PathVariable Long id) {
         ClassType classType = classTypeService.getClassTypeById(id);

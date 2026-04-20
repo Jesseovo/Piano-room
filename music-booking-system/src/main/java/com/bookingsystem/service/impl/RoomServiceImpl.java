@@ -37,6 +37,12 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public void save(Room room) {
+        if (room.getStatus() == null) {
+            room.setStatus(1);
+        }
+        if (room.getCheckInRadius() == null) {
+            room.setCheckInRadius(100);
+        }
         room.setCreatedAt(LocalDateTime.now());
         room.setUpdatedAt(LocalDateTime.now());
         roomMapper.save(room);

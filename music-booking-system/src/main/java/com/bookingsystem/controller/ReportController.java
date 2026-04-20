@@ -1,5 +1,6 @@
 package com.bookingsystem.controller;
 
+import com.bookingsystem.annotation.RequireRoles;
 import com.bookingsystem.dto.CountReservationsDTO;
 import com.bookingsystem.dto.RoomTypeUsageDTO;
 import com.bookingsystem.dto.RoomUsageSummaryDTO;
@@ -42,6 +43,7 @@ public class ReportController {
      * 统计预约总数
      * range：TODAY、WEEK、MONTH、YEAR 默认为TODAY
      */
+    @RequireRoles({"admin", "super_admin"})
     @GetMapping("/countReservations")
     public Result countReservations( CountReservationsDTO countReservationsDTO) {
         if (countReservationsDTO.getStart() != null && countReservationsDTO.getEnd() != null){
@@ -68,6 +70,7 @@ public class ReportController {
     /**
      * 预约通过率
      */
+    @RequireRoles({"admin", "super_admin"})
     @GetMapping("/approvalRate")
     public Result approvalRate( CountReservationsDTO countReservationsDTO) {
         log.info("approvalRate:{}", countReservationsDTO);
@@ -87,6 +90,7 @@ public class ReportController {
     /**
      * 活跃用户数
      */
+    @RequireRoles({"admin", "super_admin"})
     @GetMapping("/activeUsers")
     public Result activeUsers( CountReservationsDTO countReservationsDTO) {
         if (countReservationsDTO.getStart() != null && countReservationsDTO.getEnd() != null){
@@ -103,6 +107,7 @@ public class ReportController {
     /**
      * 注册用户数
      */
+    @RequireRoles({"admin", "super_admin"})
     @GetMapping("/registeredUsers")
     public Result registeredUsers() {
         int userNum = reportService.registeredUsers();
@@ -112,6 +117,7 @@ public class ReportController {
     /**
      * 待审核预约数
      */
+    @RequireRoles({"admin", "super_admin"})
     @GetMapping("/pendingReservations")
     public Result pendingReservations() {
         int num = reportService.pendingReservations();
@@ -148,6 +154,7 @@ public class ReportController {
     /**
      * 预约状态分布
      */
+    @RequireRoles({"admin", "super_admin"})
     @GetMapping("/reservationStatusDistribution")
     public Result reservationStatusDistribution() {
         List<ReservationCountVO> lists = reportService.getReservationStatusDistribution();
@@ -158,6 +165,7 @@ public class ReportController {
      * 预约趋势
      * @return
      */
+    @RequireRoles({"admin", "super_admin"})
     @GetMapping("/weekly")
     public Result getWeeklyStatistics() {
         List<DayOfWeekCountVO> lists = reportService.getWeeklyStatistics();
@@ -185,6 +193,7 @@ public class ReportController {
     /**
      * 热门时段分析
      */
+    @RequireRoles({"admin", "super_admin"})
     @GetMapping("/time-slot-report")
     public Result getTimeSlotReport(
             @RequestParam("start") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate start,
@@ -202,6 +211,7 @@ public class ReportController {
      * @param end
      * @return
      */
+    @RequireRoles({"admin", "super_admin"})
     @GetMapping("/usage")
     public Result getUsageSummary(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
@@ -211,6 +221,7 @@ public class ReportController {
         return Result.success(roomUsageSummary);
     }
 
+    @RequireRoles({"admin", "super_admin"})
     @GetMapping("/typeusage")
     public Result getTypeUsageReport(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
@@ -223,8 +234,21 @@ public class ReportController {
     /**
      * 今日预约概览：返回今日已预约数和可用（未被预约）琴房数
      */
+    @GetMapping("/public/bookingOverview")
+    public Result publicBookingOverview() {
+        return Result.success(buildBookingOverview());
+    }
+
+    /**
+     * 管理端今日预约概览：返回今日已预约数和可用（未被预约）琴房数
+     */
+    @RequireRoles({"admin", "super_admin"})
     @GetMapping("/bookingOverview")
     public Result bookingOverview() {
+        return Result.success(buildBookingOverview());
+    }
+
+    private Map<String, Integer> buildBookingOverview() {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
 
@@ -241,12 +265,13 @@ public class ReportController {
         result.put("bookedToday", bookedToday);
         result.put("availableToday", availableToday);
         result.put("totalRooms", totalRooms);
-        return Result.success(result);
+        return result;
     }
 
     /**
      * 今日总练琴时长（分钟），从签到签退记录汇总
      */
+    @RequireRoles({"admin", "super_admin"})
     @GetMapping("/totalPracticeHours")
     public Result totalPracticeHours() {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();

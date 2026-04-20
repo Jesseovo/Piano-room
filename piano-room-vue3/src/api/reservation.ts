@@ -43,6 +43,9 @@ export const reservationApi = {
   signIn: (id: number, longitude?: number, latitude?: number) => 
     request.post(`/reservations/${id}/sign-in`, null, { params: { longitude, latitude } }),
   signOut: (id: number) => request.post(`/reservations/${id}/sign-out`),
+  adminAssistSignIn: (id: number) => request.post(`/reservations/${id}/admin-sign-in`),
+  adminAssistSignOut: (id: number) => request.post(`/reservations/${id}/admin-sign-out`),
+  adminAssistCancel: (id: number, reason?: string) => request.put(`/reservations/${id}/admin-cancel`, { remarks: reason }),
   listPracticeDuration: (params: ReservationQueryParams) =>
     request.get('/reservations/practiceduration', { params }),
 }

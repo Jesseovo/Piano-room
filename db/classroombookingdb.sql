@@ -127,6 +127,7 @@ CREATE TABLE `users` (
   `department_id`    bigint       NULL DEFAULT NULL COMMENT '所属院系ID',
   `avatar_url`       varchar(255) NULL DEFAULT NULL COMMENT '头像URL',
   `status`           tinyint      NOT NULL DEFAULT 1 COMMENT '账号状态(1:正常,0:禁用)',
+  `token_version`    int          NOT NULL DEFAULT 0 COMMENT 'token版本，用于令牌失效控制',
   `violation_count`  int          NOT NULL DEFAULT 0 COMMENT '累计违约次数（预约后未签到）',
   `ban_until`        datetime     NULL DEFAULT NULL COMMENT '封禁到期时间（null=未封禁）',
   `last_login_time`  datetime     NULL DEFAULT NULL COMMENT '最后登录时间',
@@ -142,10 +143,10 @@ CREATE TABLE `users` (
   COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- 初始用户数据（密码均为 123456 的 MD5）
-INSERT INTO `users` VALUES (1, 'student1', 'e10adc3949ba59abbe56e057f20f883e', '张三', '20230001', 'student1@test.com', '13800138001', '2023级', '音乐学', 'student', NULL, NULL, 1, 0, NULL, NULL, NULL, NOW(), NOW());
-INSERT INTO `users` VALUES (2, 'student2', 'e10adc3949ba59abbe56e057f20f883e', '李四', '20230002', 'student2@test.com', '13800138002', '2023级', '钢琴表演', 'student', NULL, NULL, 1, 0, NULL, NULL, NULL, NOW(), NOW());
-INSERT INTO `users` VALUES (3, 'admin1',   'e10adc3949ba59abbe56e057f20f883e', '王管理员', 'A2023001', 'admin1@test.com', '13800138003', NULL, NULL, 'admin', NULL, NULL, 1, 0, NULL, NULL, NULL, NOW(), NOW());
-INSERT INTO `users` VALUES (4, 'superadmin', 'e10adc3949ba59abbe56e057f20f883e', '超级管理员', 'SA001', 'super@test.com', '13900000000', NULL, NULL, 'super_admin', NULL, NULL, 1, 0, NULL, NULL, NULL, NOW(), NOW());
+INSERT INTO `users` VALUES (1, 'student1', 'e10adc3949ba59abbe56e057f20f883e', '张三', '20230001', 'student1@test.com', '13800138001', '2023级', '音乐学', 'student', NULL, NULL, 1, 0, 0, NULL, NULL, NULL, NOW(), NOW());
+INSERT INTO `users` VALUES (2, 'student2', 'e10adc3949ba59abbe56e057f20f883e', '李四', '20230002', 'student2@test.com', '13800138002', '2023级', '钢琴表演', 'student', NULL, NULL, 1, 0, 0, NULL, NULL, NULL, NOW(), NOW());
+INSERT INTO `users` VALUES (3, 'admin1',   'e10adc3949ba59abbe56e057f20f883e', '王管理员', 'A2023001', 'admin1@test.com', '13800138003', NULL, NULL, 'admin', NULL, NULL, 1, 0, 0, NULL, NULL, NULL, NOW(), NOW());
+INSERT INTO `users` VALUES (4, 'superadmin', 'e10adc3949ba59abbe56e057f20f883e', '超级管理员', 'SA001', 'super@test.com', '13900000000', NULL, NULL, 'super_admin', NULL, NULL, 1, 0, 0, NULL, NULL, NULL, NOW(), NOW());
 
 -- ----------------------------
 -- Table structure for penalty_rules（阶梯惩罚规则，管理员可配置）
@@ -237,5 +238,33 @@ CREATE TABLE `system_config` (
 INSERT INTO `system_config` VALUES (1, 'baseSetting', NULL,
   '{"systemName":"皮埃诺预约系统","description":"学生个人练琴室在线预约平台","primaryColor":"#ff69b4","logo":null,"favicon":null,"email":null,"phone":null,"copyright":"© 2025 皮埃诺预约系统"}',
   NULL, NULL, NOW(), NOW());
+INSERT INTO `system_config` VALUES (2, 'reservationSetting', NULL,
+  '{"maxAdvanceDays":7,"signInGrace":10,"maxNoShow":3}',
+  NULL, NULL, NOW(), NOW());
+INSERT INTO `system_config` VALUES (3, 'securitySetting', NULL,
+  '{"tokenExpireHours":24,"minPasswordLength":6}',
+  NULL, NULL, NOW(), NOW());
+
+-- ----------------------------
+-- Table structure for shared_verification_codes
+-- ----------------------------
+DROP TABLE IF EXISTS `shared_verification_codes`;
+CREATE TABLE `shared_verification_codes` (
+  `id`               bigint       NOT NULL AUTO_INCREMENT,
+  `business_type`    varchar(64)  NOT NULL COMMENT '验证码业务类型',
+  `verification_key` varchar(64)  NOT NULL COMMENT '前端持有的验证码key',
+  `code_value`       varchar(64)  NOT NULL COMMENT '验证码值',
+  `target`           varchar(255) NULL DEFAULT NULL COMMENT '目标邮箱等附加校验信息',
+  `expires_at`       datetime     NOT NULL COMMENT '过期时间',
+  `consumed`         tinyint      NOT NULL DEFAULT 0 COMMENT '是否已消费',
+  `created_at`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_business_verification_key` (`business_type` ASC, `verification_key` ASC) USING BTREE,
+  INDEX `idx_shared_verification_expires_at` (`expires_at` ASC) USING BTREE,
+  INDEX `idx_shared_verification_target` (`target` ASC) USING BTREE
+) ENGINE = InnoDB
+  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
+  COMMENT = '共享验证码表' ROW_FORMAT = DYNAMIC;
 
 SET FOREIGN_KEY_CHECKS = 1;

@@ -1,5 +1,6 @@
 package com.bookingsystem.controller;
 
+import com.bookingsystem.annotation.RequireRoles;
 import com.bookingsystem.dto.LogQueryDTO;
 import com.bookingsystem.pojo.OperationLog;
 import com.bookingsystem.pojo.PageResult;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/operationLogs")
 @Slf4j
+@RequireRoles({"admin", "super_admin"})
 public class OperationLogController {
 
     @Autowired

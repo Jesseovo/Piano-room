@@ -1,5 +1,6 @@
 package com.bookingsystem.controller;
 
+import com.bookingsystem.annotation.RequireRoles;
 import com.bookingsystem.dto.MaintenanceQueryDTO;
 import com.bookingsystem.pojo.PageResult;
 import com.bookingsystem.pojo.Result;
@@ -14,6 +15,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/maintenance")
+@RequireRoles({"admin", "super_admin"})
 public class MaintenanceController {
 
     @Autowired

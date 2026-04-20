@@ -5,6 +5,7 @@ export interface LoginParams {
   username: string
   password: string
   captcha: string
+  captchaKey: string
 }
 
 export interface RegisterParams {
@@ -14,7 +15,15 @@ export interface RegisterParams {
   email: string
   studentId: string
   captchaCode: string
+  captchaKey: string
   emailCode: string
+  emailCodeKey: string
+}
+
+export interface VerificationChallenge {
+  image?: string
+  verificationKey: string
+  expiresInSeconds: number
 }
 
 export interface UserQueryParams {

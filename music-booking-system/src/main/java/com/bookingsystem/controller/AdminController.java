@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/admins")
+@SuperAdmin
 public class AdminController {
 
     @Autowired
@@ -37,9 +38,9 @@ public class AdminController {
      */
     @Log(module = "管理员管理", type = "添加管理员", description = "添加新的管理员")
     @PostMapping
-//    @SuperAdmin
     public Result save(@RequestBody User user){
-        log.info("创建用户:{}",user);
+        log.info("创建管理员账号: username={}, userType={}", user.getUsername(), "admin");
+        user.setUserType("admin");
         adminService.save(user);
         return Result.success();
     }
@@ -58,9 +59,7 @@ public class AdminController {
      */
     @Log(module = "管理员管理", type = "重置密码", description = "重置管理员密码")
     @PutMapping
-//    @SuperAdmin
     public Result resetPassword(Long id,String password, String againPassword){
-        log.info("重置用户密码:{},{}",password,againPassword);
         if(!password.equals(againPassword)){
             return Result.error("两次密码不一致");
         }
@@ -73,7 +72,6 @@ public class AdminController {
      */
     @Log(module = "管理员管理", type = "删除管理员", description = "根据id删除管理员")
     @DeleteMapping
-//    @SuperAdmin
     public Result delete(@RequestBody Long[] ids){
         log.info("批量删除用户:{}",ids);
         adminService.delete(ids);
@@ -96,7 +94,8 @@ public class AdminController {
     @Log(module = "管理员管理", type = "更新管理员", description = "更新管理员信息")
     @PutMapping("/info")
     public Result update(@RequestBody User user){
-        log.info("更新用户信息:{}",user);
+        log.info("更新管理员信息: id={}, username={}", user.getId(), user.getUsername());
+        user.setUserType("admin");
         adminService.update(user);
         return Result.success();
     }

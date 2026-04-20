@@ -1,6 +1,8 @@
 package com.bookingsystem.controller;
 
 import com.bookingsystem.annotation.Log;
+import com.bookingsystem.annotation.PublicAccess;
+import com.bookingsystem.annotation.RequireRoles;
 import com.bookingsystem.dto.RoomDTO;
 import com.bookingsystem.dto.RoomQueryDTO;
 import com.bookingsystem.pojo.PageResult;
@@ -32,6 +34,7 @@ public class RoomController {
      * 查询所有教室及条件查询开发
      * @return
      */
+    @PublicAccess
     @GetMapping
     public Result list(RoomQueryDTO roomQueryDTO){
         log.info("查询所有教室及条件查询:{}",roomQueryDTO);
@@ -44,6 +47,7 @@ public class RoomController {
      * @param room
      * @return
      */
+    @RequireRoles({"admin", "super_admin"})
     @PostMapping
     @Log(module = "琴房管理", type = "添加琴房", description = "添加新的琴房")
     public Result save(@RequestBody Room room){
@@ -57,6 +61,7 @@ public class RoomController {
      * @param id
      * @return
      */
+    @RequireRoles({"admin", "super_admin"})
     @DeleteMapping("/{id}")
     @Log(module = "琴房管理", type = "删除琴房", description = "根据id删除琴房")
     public Result deleteById(@PathVariable Long id){
@@ -70,6 +75,7 @@ public class RoomController {
      * @param id
      * @return
      */
+    @PublicAccess
     @GetMapping("/{id}")
     public Result getById(@PathVariable Long id){
         log.info("查询教室:{}",id);
@@ -82,6 +88,7 @@ public class RoomController {
      * @param room
      * @return
      */
+    @RequireRoles({"admin", "super_admin"})
     @PutMapping
     @Log(module = "琴房管理", type = "更新琴房", description = "更新琴房信息")
     public Result update(@RequestBody Room room){
@@ -93,6 +100,7 @@ public class RoomController {
     /**
      * 设置琴房状态
      */
+    @RequireRoles({"admin", "super_admin"})
     @PutMapping("/{id}/status")
     @Log(module = "琴房管理", type = "设置状态", description = "启用或停用琴房")
     public Result setStatus(@PathVariable Long id, @RequestParam Integer status){
@@ -104,6 +112,7 @@ public class RoomController {
     /**
      * 教室维护
      */
+    @RequireRoles({"admin", "super_admin"})
     @PostMapping("/maintenance")
     @Log(module = "琴房管理", type = "琴房维护", description = "设置琴房维护状态")
     public Result maintenance(@RequestBody RoomMaintenance roomMaintenance){
@@ -116,6 +125,7 @@ public class RoomController {
     /**
      * 根据教室查询维护记录
      */
+    @RequireRoles({"admin", "super_admin"})
     @GetMapping("/maintenance/{roomId}")
     public Result getMaintenance(@PathVariable Long roomId){
         log.info("根据教室查询维护记录:{}",roomId);
@@ -126,6 +136,7 @@ public class RoomController {
     /**
      * 更新或者新增维护记录
      */
+    @RequireRoles({"admin", "super_admin"})
     @PostMapping("/maintenance/update-or-insert")
     @Log(module = "琴房管理", type = "维护记录", description = "更新或新增琴房维护记录")
     public Result updateOrInsert(@RequestBody RoomMaintenance roomMaintenance){
@@ -145,6 +156,7 @@ public class RoomController {
      * @return
      */
 
+    @PublicAccess
     @GetMapping("/search")
     public Result searchRooms( RoomDTO roomDTO) {
         log.info("查询教室:{}",roomDTO);
@@ -157,6 +169,7 @@ public class RoomController {
      * 前台 今日热门教室展示
      * @return
      */
+    @PublicAccess
     @GetMapping("/hot-today")
     public Result getTodayHotRooms() {
         List<HotRoomVO> hotRooms = roomService.getTodayHotRooms();
@@ -166,6 +179,7 @@ public class RoomController {
     /**
      * 导出房间信息
      */
+    @RequireRoles({"admin", "super_admin"})
     @GetMapping("/export")
     public void exportRooms(HttpServletResponse response) throws IOException {
         List<RoomQueryVO> rooms = roomService.getAllRoomsForExport();

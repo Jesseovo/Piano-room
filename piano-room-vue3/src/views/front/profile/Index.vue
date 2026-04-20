@@ -171,8 +171,11 @@ async function loadStats() {
       const d = res.data as Record<string, unknown>
       if (statsItems.value[0]) statsItems.value[0].value = String(d.totalCount ?? '-')
       if (statsItems.value[1]) statsItems.value[1].value = String(d.completedCount ?? '-')
-      if (statsItems.value[2]) statsItems.value[2].value = String(d.cancelCount ?? '-')
-      if (statsItems.value[3]) statsItems.value[3].value = String(d.totalHours ?? '-')
+      if (statsItems.value[2]) statsItems.value[2].value = String(d.cancelledCount ?? '-')
+      if (statsItems.value[3]) {
+        const totalPracticeMinutes = Number(d.totalPracticeMinutes ?? 0)
+        statsItems.value[3].value = (totalPracticeMinutes / 60).toFixed(1)
+      }
     }
   } catch {
     // 静默失败

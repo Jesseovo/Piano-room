@@ -3,7 +3,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import router from '@/router'
 
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8099',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   timeout: 15000,
   withCredentials: true,
 })

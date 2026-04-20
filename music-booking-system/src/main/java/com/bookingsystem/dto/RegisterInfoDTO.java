@@ -49,5 +49,15 @@ public class RegisterInfoDTO {
      * 验证码
      */
     private String captchaCode;
+
+    /**
+     * 图形验证码key
+     */
+    private String captchaKey;
+
+    /**
+     * 邮箱验证码key
+     */
+    private String emailCodeKey;
 }
 

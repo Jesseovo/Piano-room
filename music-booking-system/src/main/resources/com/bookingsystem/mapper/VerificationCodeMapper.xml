@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bookingsystem.mapper.VerificationCodeMapper">
+    <insert id="upsert" parameterType="com.bookingsystem.pojo.VerificationCodeRecord">
+        INSERT INTO shared_verification_codes
+        (business_type, verification_key, code_value, target, expires_at, consumed)
+        VALUES
+        (#{businessType}, #{verificationKey}, #{codeValue}, #{target}, #{expiresAt}, #{consumed})
+        ON DUPLICATE KEY UPDATE
+            code_value = VALUES(code_value),
+            target = VALUES(target),
+            expires_at = VALUES(expires_at),
+            consumed = VALUES(consumed),
+            updated_at = CURRENT_TIMESTAMP
+    </insert>
+
+    <select id="selectByBusinessTypeAndVerificationKey" resultType="com.bookingsystem.pojo.VerificationCodeRecord">
+        SELECT id, business_type, verification_key, code_value, target, expires_at, consumed, created_at, updated_at
+        FROM shared_verification_codes
+        WHERE business_type = #{businessType}
+          AND verification_key = #{verificationKey}
+        LIMIT 1
+    </select>
+
+    <update id="consume">
+        UPDATE shared_verification_codes
+        SET consumed = 1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE business_type = #{businessType}
+          AND verification_key = #{verificationKey}
+    </update>
+
+    <delete id="deleteExpiredCodes">
+        DELETE FROM shared_verification_codes
+        WHERE consumed = 1 OR expires_at &lt; NOW()
+    </delete>
+</mapper>

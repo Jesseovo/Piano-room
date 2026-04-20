@@ -7,6 +7,7 @@ import com.bookingsystem.pojo.Room;
 import com.bookingsystem.pojo.TimeSlotReport;
 import com.bookingsystem.qo.AvailableRoomQO;
 import com.bookingsystem.vo.DayOfWeekCountVO;
+import com.bookingsystem.vo.PracticeDurationSummaryVO;
 import com.bookingsystem.vo.PracticeDurationVO;
 import com.bookingsystem.vo.ReservationCountVO;
 import com.bookingsystem.vo.UserReservationStatsVO;
@@ -38,9 +39,11 @@ public interface ReservationMapper {
                                         @Param("date") String date);
 
     @Insert("INSERT INTO reservations(user_id, room_id, title, purpose, " +
-            "start_time, end_time, attendees, remarks, status) " +
+            "start_time, end_time, attendees, remarks, status, " +
+            "legacy_date, legacy_start_time, legacy_end_time, duration) " +
             "VALUES(#{userId}, #{roomId}, #{title}, #{purpose}, " +
-            "#{startTime}, #{endTime}, #{attendees}, #{remarks}, 'approved')")
+            "#{startTime}, #{endTime}, #{attendees}, #{remarks}, 'approved', " +
+            "#{legacyDate}, #{legacyStartTime}, #{legacyEndTime}, #{duration})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int create(Reservation reservation);
 
@@ -87,7 +90,9 @@ public interface ReservationMapper {
      * 悲观锁：查询冲突预约并加行锁，防止高并发超卖
      * 必须在 @Transactional 事务中使用
      */
-    @Select("SELECT COUNT(*) FROM reservations " +
+    @Select("SELECT CASE " +
+            "WHEN COALESCE(SUM(attendees), 0) >= (SELECT capacity FROM rooms WHERE id = #{roomId}) " +
+            "THEN 1 ELSE 0 END FROM reservations " +
             "WHERE room_id = #{roomId} " +
             "AND status = 'approved' " +
             "AND ((start_time < #{endTime} AND end_time > #{startTime})) " +
@@ -245,6 +250,8 @@ public interface ReservationMapper {
      * 查询时长管理列表（联表查询预约、用户、琴房信息）
      */
     List<PracticeDurationVO> listPracticeDuration(ReservationQueryDTO reservationQueryDTO);
+
+    List<PracticeDurationSummaryVO> listPracticeDurationSummary(ReservationQueryDTO reservationQueryDTO);
 
     /**
      * 统计指定时间范围内的总练琴时长（分钟）

@@ -8,6 +8,9 @@ export const exportApi = {
     request.get('/export/users', { params, responseType: 'blob' }),
 
   exportRooms: () => request.get('/room/export', { responseType: 'blob' }),
+
+  exportPracticeDuration: (params: { startDate?: string; endDate?: string; username?: string }) =>
+    request.get('/reservations/practiceduration/export', { params, responseType: 'blob' }),
 }
 
 export function downloadBlob(blob: Blob, filename: string) {

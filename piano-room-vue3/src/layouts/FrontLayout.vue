@@ -87,7 +87,7 @@
             <button class="y2k-btn y2k-btn-sm" @click="router.push('/login')" @mouseenter="playHover">
               登录
             </button>
-            <button class="y2k-btn y2k-btn-primary y2k-btn-sm" @click="router.push('/register')" @mouseenter="playHover">
+            <button v-if="allowPublicRegistration" class="y2k-btn y2k-btn-primary y2k-btn-sm" @click="router.push('/register')" @mouseenter="playHover">
               注册
             </button>
           </template>
@@ -171,7 +171,7 @@
       <button class="y2k-btn y2k-btn-block" @click="router.push('/login')" @mouseenter="playHover">
         登录
       </button>
-      <button class="y2k-btn y2k-btn-primary y2k-btn-block" @click="router.push('/register')" @mouseenter="playHover">
+      <button v-if="allowPublicRegistration" class="y2k-btn y2k-btn-primary y2k-btn-block" @click="router.push('/register')" @mouseenter="playHover">
         注册
       </button>
     </div>
@@ -197,6 +197,7 @@ const breakpoints = useBreakpoints(breakpointsTailwind)
 const isMobile = breakpoints.smaller('md')
 
 const systemName = computed(() => settingsStore.basicSettings?.systemName || '皮埃诺预约系统')
+const allowPublicRegistration = computed(() => settingsStore.publicSecurity?.publicRegistrationEnabled === true)
 const currentYear = new Date().getFullYear()
 const isScrolled = ref(false)
 
@@ -227,6 +228,13 @@ async function refreshSettings() {
     const penaltyRes = await request.get('/system/penalty-rules')
     if (penaltyRes?.code === 1 && penaltyRes.data) {
       settingsStore.setPenaltyRules(penaltyRes.data)
+    }
+  } catch { /* 静默失败 */ }
+
+  try {
+    const publicSecurityRes = await request.get('/system/settings/public-security')
+    if (publicSecurityRes?.code === 1 && publicSecurityRes.data) {
+      settingsStore.setPublicSecurity(publicSecurityRes.data)
     }
   } catch { /* 静默失败 */ }
 }
@@ -650,13 +658,35 @@ function handleCommand(cmd: string) {
 
 /* ===== 响应式 ===== */
 @media (max-width: 768px) {
+  .front-layout.has-mobile-bar {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom));
+  }
+
   .header-inner {
     padding: 0 16px;
-    gap: 16px;
+    gap: 12px;
+    justify-content: space-between;
+  }
+
+  .y2k-logo {
+    min-width: 0;
+    flex: 1;
   }
 
   .logo-text {
     font-size: 14px;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .header-right {
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .y2k-user-info {
+    padding-right: 8px;
   }
 
   .footer-content {
@@ -672,6 +702,46 @@ function handleCommand(cmd: string) {
     flex-direction: column;
     gap: 8px;
     text-align: center;
+  }
+
+  .y2k-mobile-bar {
+    height: 68px;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .mobile-tab {
+    min-width: 0;
+  }
+
+  .y2k-mobile-auth {
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 480px) {
+  .header-inner {
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .logo-text {
+    max-width: 112px;
+    font-size: 13px;
+  }
+
+  .header-right :deep(.el-avatar) {
+    width: 32px;
+    height: 32px;
+  }
+
+  .header-right .y2k-btn {
+    min-width: 76px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .footer-inner {
+    padding: 0 16px;
   }
 }
 </style>

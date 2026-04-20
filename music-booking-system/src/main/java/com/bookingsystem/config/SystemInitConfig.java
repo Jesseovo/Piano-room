@@ -1,23 +1,18 @@
 package com.bookingsystem.config;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.util.BeanUtils;
 import com.bookingsystem.enums.SettingsEnums;
 import com.bookingsystem.mapper.SystemConfigMapper;
 
 import com.bookingsystem.pojo.SystemConfig;
 import com.bookingsystem.utils.JsonUtils;
-import com.fasterxml.jackson.databind.util.BeanUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 
@@ -62,7 +57,7 @@ public class SystemInitConfig {
                 });
                 notExistsConfigs.forEach(item->{
                     SettingsEnums settingsEnums = SettingsEnums.getByName(item);
-                    Object value = settingsEnums.getValue();
+                    Object value = settingsEnums.createDefaultValue();
                     String name = settingsEnums.getName();
                     SystemConfig systemConfig = new SystemConfig();
                     systemConfig.setSystemName(name);
@@ -75,10 +70,6 @@ public class SystemInitConfig {
                             inMemoryDataStore.put(item.getKey(), item.getValue());
                         }
                 );
-
-                int i = 0;
-
-
                 log.info("系统基础配置初始化完成");
             } catch (Exception e) {
                 e.printStackTrace();

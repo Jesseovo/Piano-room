@@ -124,7 +124,7 @@
             <span v-else>登录中...</span>
           </button>
 
-          <div class="y2k-register-tip">
+          <div v-if="publicRegistrationEnabled" class="y2k-register-tip">
             还没有账号？
             <router-link to="/register" class="y2k-link-bold" @mouseenter="playHover">
               立即注册 →
@@ -134,10 +134,6 @@
       </div>
     </div>
 
-    <!-- 音效提示 -->
-    <div class="y2k-sound-hint" v-if="!audioInitialized">
-      点击任意处启用音效 🔊
-    </div>
   </div>
 </template>
 
@@ -148,20 +144,21 @@ import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { User, Lock, Key, Loading } from '@element-plus/icons-vue'
 import { userApi } from '@/api/user'
 import { useAuthStore } from '@/stores/auth'
-import { useSound } from '@/composables/useSound'
+import { useSettingsStore } from '@/stores/settings'
+import request from '@/utils/request'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
-const { init, hover, click, confirm, error, focus, isInitialized } = useSound()
+const settingsStore = useSettingsStore()
 
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const captchaUrl = ref('')
 const isShaking = ref(false)
-const audioInitialized = ref(false)
+const publicRegistrationEnabled = ref(settingsStore.publicSecurity?.publicRegistrationEnabled === true)
 
-const form = ref({ username: '', password: '', captcha: '' })
+const form = ref({ username: '', password: '', captcha: '', captchaKey: '' })
 
 const rules: FormRules = {
   username: [
@@ -176,22 +173,15 @@ const rules: FormRules = {
 }
 
 function playHover() {
-  if (audioInitialized.value) hover()
+  return
 }
 
 function playClick() {
-  if (audioInitialized.value) click()
+  return
 }
 
 function playFocus() {
-  if (audioInitialized.value) focus()
-}
-
-function initAudio() {
-  if (!audioInitialized.value) {
-    init()
-    audioInitialized.value = true
-  }
+  return
 }
 
 function triggerShake() {
@@ -203,15 +193,29 @@ async function loadCaptcha() {
   captchaUrl.value = ''
   try {
     const res = await userApi.getCaptcha(0)
-    if (res?.code === 1) captchaUrl.value = res.data
+    if (res?.code === 1 && res.data) {
+      captchaUrl.value = res.data.image
+      form.value.captchaKey = res.data.verificationKey
+    }
   } catch {
     ElMessage.error('获取验证码失败，请刷新重试')
   }
 }
 
+async function loadPublicSecurity() {
+  try {
+    const res = await request.get('/system/settings/public-security')
+    if (res?.code === 1 && res.data) {
+      settingsStore.setPublicSecurity(res.data)
+      publicRegistrationEnabled.value = res.data.publicRegistrationEnabled === true
+    }
+  } catch {
+    publicRegistrationEnabled.value = false
+  }
+}
+
 async function handleLogin() {
-  initAudio()
-  click()
+  playClick()
 
   await formRef.value?.validate(async (valid) => {
     if (!valid) return
@@ -220,7 +224,6 @@ async function handleLogin() {
       const res = await userApi.login(form.value)
       if (res?.code === 1 && res.data?.token && res.data?.user) {
         authStore.login(res.data.token, res.data.user as any)
-        confirm()
         ElMessage.success('登录成功，欢迎回来！')
         const redirect = route.query.redirect as string
         if (res.data.user.userType === 'admin' || res.data.user.userType === 'super_admin') {
@@ -229,13 +232,11 @@ async function handleLogin() {
           router.push(redirect || '/')
         }
       } else {
-        error()
         ElMessage.error(res?.msg || '用户名或密码错误')
         triggerShake()
         loadCaptcha()
       }
     } catch {
-      error()
       triggerShake()
       loadCaptcha()
     } finally {
@@ -245,13 +246,8 @@ async function handleLogin() {
 }
 
 onMounted(() => {
+  loadPublicSecurity()
   loadCaptcha()
-  // 监听首次点击初始化音频
-  const handler = () => {
-    initAudio()
-    document.removeEventListener('click', handler)
-  }
-  document.addEventListener('click', handler)
 })
 </script>
 
@@ -694,23 +690,6 @@ onMounted(() => {
   margin-top: 16px;
 }
 
-/* 音效提示 */
-.y2k-sound-hint {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--y2k-font-pixel);
-  font-size: 12px;
-  color: var(--y2k-text-muted);
-  background: var(--y2k-bg-card);
-  border: 2px solid var(--y2k-border);
-  box-shadow: 3px 3px 0px var(--y2k-shadow);
-  padding: 8px 16px;
-  z-index: 100;
-  animation: y2k-blink 2s step-end infinite;
-}
-
 /* ===== 响应式 ===== */
 @media (max-width: 768px) {
   .y2k-banner {
@@ -729,10 +708,6 @@ onMounted(() => {
 
   .y2k-mobile-logo {
     display: flex;
-  }
-
-  .y2k-sound-hint {
-    bottom: 24px;
   }
 }
 </style>

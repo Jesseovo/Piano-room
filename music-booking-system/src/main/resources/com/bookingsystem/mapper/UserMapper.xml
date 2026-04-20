@@ -17,6 +17,7 @@
             <if test="userType != null">user_type,</if>
             <if test="avatarUrl != null">avatar_url,</if>
             <if test="status != null">status,</if>
+            <if test="tokenVersion != null">token_version,</if>
             <if test="createdAt != null">created_at,</if>
             <if test="updatedAt != null">updated_at,</if>
         </trim>
@@ -32,6 +33,7 @@
             <if test="userType != null">#{userType},</if>
             <if test="avatarUrl != null">#{avatarUrl},</if>
             <if test="status != null">#{status},</if>
+            <if test="tokenVersion != null">#{tokenVersion},</if>
             <if test="createdAt != null">#{createdAt},</if>
             <if test="updatedAt != null">#{updatedAt},</if>
         </trim>
@@ -69,6 +71,9 @@
             </if>
             <if test="status != null">
                 status = #{status},
+            </if>
+            <if test="tokenVersion != null">
+                token_version = #{tokenVersion},
             </if>
             <if test="lastLoginTime != null">
                 last_login_time = #{lastLoginTime},
@@ -137,9 +142,9 @@
             </if>
         </where>
     </select>
-    <select id="selectByUsername" resultType="com.bookingsystem.pojo.User">
+        <select id="selectByUsername" resultType="com.bookingsystem.pojo.User">
         select u.id, u.avatar_url, u.password, u.phone, u.username, u.real_name, u.student_id,
-               u.user_type, u.email, u.status, u.grade, u.major,
+               u.user_type, u.email, u.status, u.token_version, u.grade, u.major,
                u.violation_count, u.ban_until,
                u.last_login_time, u.last_login_ip, u.created_at, u.updated_at
         from users u

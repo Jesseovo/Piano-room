@@ -1,24 +1,28 @@
 package com.bookingsystem.enums;
 
 import com.bookingsystem.pojo.BasicSetting;
+import com.bookingsystem.pojo.ReservationSetting;
+import com.bookingsystem.pojo.SecuritySetting;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 public enum SettingsEnums {
 
 
-    BASE_SETTING("baseSetting",new BasicSetting(),BasicSetting.class),
-    BASE_SETTING2("baseSetting2", new BasicSetting(),BasicSetting.class),;
+    BASE_SETTING("baseSetting", BasicSetting.class, BasicSetting::new),
+    RESERVATION_SETTING("reservationSetting", ReservationSetting.class, ReservationSetting::new),
+    SECURITY_SETTING("securitySetting", SecuritySetting.class, SecuritySetting::new);
 
     private String name;
-    private Object value;
+    private Supplier<Object> defaultSupplier;
     private  Class type;
 
-    SettingsEnums(String name, Object value,  Class type) {
+    SettingsEnums(String name, Class type, Supplier<Object> defaultSupplier) {
         this.name = name;
-        this.value = value;
         this.type = type;
+        this.defaultSupplier = defaultSupplier;
     }
 
     public Class getType() {
@@ -28,8 +32,8 @@ public enum SettingsEnums {
         return name;
     }
 
-    public Object getValue() {
-        return value;
+    public Object createDefaultValue() {
+        return defaultSupplier.get();
     }
 
     public static SettingsEnums getByName(String name) {
@@ -43,7 +47,7 @@ public enum SettingsEnums {
 
     public static SettingsEnums getByValue(Class<?> value) {
         for (SettingsEnums setting : SettingsEnums.values()) {
-            if (setting.getValue().equals(value)) {
+            if (setting.getType().equals(value)) {
                 return setting;
             }
         }

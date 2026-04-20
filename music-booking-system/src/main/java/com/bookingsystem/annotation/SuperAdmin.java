@@ -5,7 +5,7 @@ import java.lang.annotation.*;
 /**
  * 权限检查注解
  */
-@Target(ElementType.METHOD)  // 注解作用于方法上
+@Target({ElementType.METHOD, ElementType.TYPE})  // 注解作用于方法或类上
 @Retention(RetentionPolicy.RUNTIME)  // 注解在运行时有效
 @Documented  // 注解包含在javadoc中
 public @interface SuperAdmin {

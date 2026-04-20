@@ -144,10 +144,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { roomApi } from '@/api/room'
+import { useAuthStore } from '@/stores/auth'
 import { useSettingsStore } from '@/stores/settings'
 import request from '@/utils/request'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const settingsStore = useSettingsStore()
 const hotRooms = ref<any[]>([])
 const hotLoading = ref(true)
@@ -216,6 +218,26 @@ const rules = computed(() => [
 ])
 
 async function loadBookingStatus() {
+  try {
+    const res = await request.get('/reports/public/bookingOverview')
+    if (res?.data) {
+      const { bookedToday, availableToday, totalRooms } = res.data
+      bookingStatus.value = {
+        booked: bookedToday ?? 0,
+        available: availableToday ?? 0,
+        total: totalRooms ?? ((bookedToday ?? 0) + (availableToday ?? 0)),
+      }
+      return
+    }
+  } catch {
+    bookingStatus.value = { booked: 0, available: 0, total: 0 }
+    return
+  }
+
+  if (!authStore.isAdmin) {
+    bookingStatus.value = { booked: 0, available: 0, total: 0 }
+    return
+  }
   try {
     const res = await request.get('/reports/bookingOverview')
     if (res?.data) {
@@ -657,11 +679,31 @@ onMounted(() => {
 @media (max-width: 768px) {
   .hero-section { padding: 48px 0 56px; }
   .hero-content { flex-direction: column; gap: 32px; }
-  .hero-stats { flex-direction: row; flex-wrap: wrap; justify-content: center; }
-  .stat-card { min-width: 140px; flex: 1; }
-  .hot-rooms-grid { grid-template-columns: 1fr; }
+  .hero-text { max-width: none; width: 100%; }
+  .hero-actions { flex-direction: column; }
+  .hero-actions :deep(.el-button) { width: 100%; margin-left: 0; }
+  .hero-stats { width: 100%; flex-direction: column; }
+  .stat-card { min-width: 0; width: 100%; }
+  .hot-rooms-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .flow-steps { grid-template-columns: 1fr; }
   .notice-grid { grid-template-columns: 1fr; }
   .section-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .room-meta { flex-wrap: wrap; }
+  .room-card-footer { flex-direction: column; align-items: stretch; gap: 8px; }
+  .book-link { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .hero-section { padding: 40px 0 48px; }
+  .hero-title { font-size: 22px; }
+  .hero-desc { font-size: 14px; margin-bottom: 24px; }
+  .section-title { font-size: 18px; }
+  .hot-rooms-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .room-card { padding: 14px; }
+  .room-name { line-height: 1.5; }
+}
+
+@media (max-width: 380px) {
+  .hot-rooms-grid { grid-template-columns: 1fr; }
 }
 </style>

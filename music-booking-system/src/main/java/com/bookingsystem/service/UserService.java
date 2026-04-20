@@ -37,5 +37,5 @@ public interface UserService {
      * @param email
      * @param type
      */
-    void sendEmail(String email, Integer type,HttpServletRequest request) throws IOException;
+    Map<String, Object> sendEmail(String email, Integer type,HttpServletRequest request) throws IOException;
 }

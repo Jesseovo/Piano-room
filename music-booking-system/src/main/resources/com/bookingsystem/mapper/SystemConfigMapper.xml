@@ -31,6 +31,12 @@
         SELECT system_name
         FROM system_config
     </select>
+    <select id="selectBySystemName" resultType="com.bookingsystem.pojo.SystemConfig">
+        SELECT id, system_name, logo_url, description, admin_email, contact_phone, created_at, updated_at
+        FROM system_config
+        WHERE system_name = #{systemName}
+        LIMIT 1
+    </select>
 
     <!-- 更新系统配置 -->
     <update id="updateSystemConfig">

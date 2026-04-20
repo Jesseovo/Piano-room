@@ -5,6 +5,13 @@
       <span>返回登录</span>
     </div>
     <div class="auth-card">
+      <div v-if="registrationClosed" class="auth-header">
+        <el-icon size="36" color="#e6a23c"><Headset /></el-icon>
+        <h2>自助注册已关闭</h2>
+        <p>学校正式环境不开放匿名注册，请联系管理员或通过学校统一身份入口登录。</p>
+        <el-button type="primary" class="submit-btn" @click="router.push('/login')">返回登录</el-button>
+      </div>
+      <template v-else>
       <div class="auth-header">
         <el-icon size="36" color="#409eff"><Headset /></el-icon>
         <h2>注册账号</h2>
@@ -41,6 +48,7 @@
         </el-form-item>
         <el-button type="primary" :loading="loading" class="submit-btn" @click="handleRegister">注册</el-button>
       </el-form>
+      </template>
     </div>
   </div>
 </template>
@@ -50,12 +58,16 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { userApi } from '@/api/user'
+import { useSettingsStore } from '@/stores/settings'
+import request from '@/utils/request'
 
 const router = useRouter()
+const settingsStore = useSettingsStore()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const captchaUrl = ref('')
 const emailCooldown = ref(0)
+const registrationClosed = ref(settingsStore.publicSecurity?.publicRegistrationEnabled !== true)
 
 const form = ref({
   username: '',
@@ -63,8 +75,10 @@ const form = ref({
   studentId: '',
   email: '',
   emailCode: '',
+  emailCodeKey: '',
   password: '',
   captchaCode: '',
+  captchaKey: '',
 })
 
 const rules: FormRules = {
@@ -78,12 +92,18 @@ const rules: FormRules = {
 
 async function loadCaptcha() {
   const res = await userApi.getCaptcha(1)
-  if (res?.code === 1) captchaUrl.value = res.data
+  if (res?.code === 1 && res.data) {
+    captchaUrl.value = res.data.image
+    form.value.captchaKey = res.data.verificationKey
+  }
 }
 
 async function sendEmailCode() {
   if (!form.value.email) { ElMessage.warning('请先输入邮箱'); return }
-  await userApi.sendEmailCode(form.value.email, 0)
+  const res = await userApi.sendEmailCode(form.value.email, 0)
+  if (res?.code === 1 && res.data?.verificationKey) {
+    form.value.emailCodeKey = res.data.verificationKey
+  }
   ElMessage.success('验证码已发送')
   emailCooldown.value = 60
   const timer = setInterval(() => {
@@ -93,6 +113,10 @@ async function sendEmailCode() {
 }
 
 async function handleRegister() {
+  if (registrationClosed.value) {
+    ElMessage.warning('学校正式环境已关闭自助注册')
+    return
+  }
   await formRef.value?.validate(async (valid) => {
     if (!valid) return
     loading.value = true
@@ -111,7 +135,24 @@ async function handleRegister() {
   })
 }
 
-onMounted(() => loadCaptcha())
+async function loadPublicSecurity() {
+  try {
+    const res = await request.get('/system/settings/public-security')
+    if (res?.code === 1 && res.data) {
+      settingsStore.setPublicSecurity(res.data)
+      registrationClosed.value = res.data.publicRegistrationEnabled !== true
+    }
+  } catch {
+    registrationClosed.value = true
+  }
+}
+
+onMounted(async () => {
+  await loadPublicSecurity()
+  if (!registrationClosed.value) {
+    loadCaptcha()
+  }
+})
 </script>
 
 <style scoped>

@@ -6,10 +6,13 @@ import com.bookingsystem.dto.ReservationDTO;
 import com.bookingsystem.dto.ReservationQueryDTO;
 import com.bookingsystem.pojo.*;
 import com.bookingsystem.qo.AvailableRoomQO;
+import com.bookingsystem.vo.PracticeDurationSummaryVO;
 import com.bookingsystem.vo.PracticeDurationVO;
 import com.bookingsystem.vo.UserReservationStatsVO;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ReservationService {
@@ -45,6 +48,8 @@ public interface ReservationService {
      */
     Integer cancelReservation(Long id, String remark);
 
+    Integer adminAssistCancelReservation(Long id, String remark);
+
     /**
      * 更新预约
      * @param id
@@ -62,10 +67,14 @@ public interface ReservationService {
      */
     Result signIn(Long reservationId, Double longitude, Double latitude);
 
+    Result adminAssistSignIn(Long reservationId);
+
     /**
      * 预约签退：校验已签到、未签退、且在预约时间内
      */
     Result signOut(Long reservationId);
+
+    Result adminAssistSignOut(Long reservationId);
 
     /**
      * 查询时长管理列表
@@ -73,4 +82,8 @@ public interface ReservationService {
      * @return 时长管理列表
      */
     PageResult<PracticeDurationVO> listPracticeDuration(ReservationQueryDTO reservationQueryDTO);
+
+    List<PracticeDurationSummaryVO> listPracticeDurationSummary(ReservationQueryDTO reservationQueryDTO);
+
+    void exportPracticeDurationSummary(List<PracticeDurationSummaryVO> summaries, HttpServletResponse response) throws IOException;
 }

@@ -20,32 +20,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
     
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 注册JWT认证拦截器
         registry.addInterceptor(jwtAuthInterceptor)
-                // 添加需要拦截的路径
-                .addPathPatterns("/**")  // 拦截所有/开头的请求
-                // 排除不需要拦截的路径
+                .addPathPatterns("/**")
                 .excludePathPatterns(
-                        "/user/login",       // 登录接口
-                        "/user/register",    // 注册接口
-                        "/user/captcha",     // 验证码接口
-                        "/user/email/code",
-                        "/system/settings/basic",
-                        "/announcements",
-                        "/classType",
-                        "/reports/classroomUsageRate",
-                        "/reports/classroomDistribution",
-                        "/room/hot-today",
-                        "/depts",
-                        "/classType/all",
-                        "/buildings",
-                        "/room/search",
-                        "/reservations/availability",
-                        "/reservations/list",
-                        "/room/*",
-                        "/error",            // 错误页面，避免循环拦截
-                        "/50x.html",         // Nginx错误页面
-                        "/404.html"          // 404页面
+                        "/error",
+                        "/50x.html",
+                        "/404.html"
                 );
     }
 }

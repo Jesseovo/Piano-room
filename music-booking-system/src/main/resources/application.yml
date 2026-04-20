@@ -1,26 +1,26 @@
 spring:
   # 数据库配置文件
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:classroombookingdb}?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:piano_room_booking}?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: 123456  # 改成自己的密码
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
   mail:
-    host: smtp.163.com # 邮件服务器地址
-    port: 25  # 端口号（SSL 用 465，STARTTLS 用 25/587）
-    username: 18249011733@163.com  # 改成自己的邮箱(可选)
-    password: GBfKiRwfbM8P7cun  # 改成自己的授权码
+    host: ${MAIL_HOST:smtp.163.com}
+    port: ${MAIL_PORT:25}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     default-encoding: UTF-8
     properties:
       mail:
         smtp:
-          auth: true
+          auth: ${MAIL_SMTP_AUTH:true}
           starttls:
-            enable: true
-            required: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
+            enable: ${MAIL_SMTP_STARTTLS_ENABLE:true}
+            required: ${MAIL_SMTP_STARTTLS_REQUIRED:true}
+          connectiontimeout: ${MAIL_CONNECTION_TIMEOUT:5000}
+          timeout: ${MAIL_TIMEOUT:5000}
+          writetimeout: ${MAIL_WRITE_TIMEOUT:5000}
   thymeleaf:
     cache: false
     prefix: classpath:/templates/
@@ -37,15 +37,14 @@ spring:
     name: classroom-booking-system
 mybatis:
   configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     #方式三开启驼峰命名
     map-underscore-to-camel-case: true
 
 alioss:
-  endpoint:
-  accessKeyId:
-  bucketName:
-  accessKeySecret:
+  endpoint: ${ALIOSS_ENDPOINT:}
+  accessKeyId: ${ALIOSS_ACCESS_KEY_ID:}
+  bucketName: ${ALIOSS_BUCKET_NAME:}
+  accessKeySecret: ${ALIOSS_ACCESS_KEY_SECRET:}
 
 server:
   port: 8099
@@ -61,9 +60,16 @@ logging:
     root: INFO
     com.bookingsystem: INFO
     org.springframework.jdbc.support.JdbcTransactionManager: INFO
-    org.apache.ibatis: INFO
+    org.apache.ibatis: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
   file:
     encoding: UTF-8
+
+jwt:
+  secret: ${JWT_SECRET}
+
+app:
+  security:
+    public-registration-enabled: ${APP_PUBLIC_REGISTRATION_ENABLED:false}

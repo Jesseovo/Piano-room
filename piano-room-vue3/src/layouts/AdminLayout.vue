@@ -461,4 +461,52 @@ function handleCommand(cmd: string) {
 :global(.logout-item) {
   color: #ff4500 !important;
 }
+
+@media (max-width: 768px) {
+  .y2k-aside {
+    width: 72px;
+  }
+
+  .aside-brand {
+    justify-content: center;
+    padding: 0 12px;
+  }
+
+  .brand-name,
+  .brand-blink,
+  .aside-footer,
+  .menu-sep {
+    display: none;
+  }
+
+  .y2k-topbar {
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .topbar-left {
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .y2k-breadcrumb,
+  .topbar-divider,
+  .topbar-username {
+    display: none;
+  }
+
+  .y2k-topbar-user {
+    padding: 6px 8px;
+  }
+
+  .admin-content {
+    padding: 16px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-content {
+    padding: 12px 8px;
+  }
+}
 </style>

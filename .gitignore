@@ -31,3 +31,29 @@ nginx-1.28.0/nginx.exe
 *.iml
 *.iws
 *.ipr
+.env
+
+# local cache / temp
+music-booking-system/.m2-local/
+db/backups/
+.commit-msg
+music-booking-system/codex-maven-settings.xml
+test-api.ps1
+
+# local build outputs
+music-booking-system/target/
+piano-room-vue3/dist/
+piano-room-vue3/node_modules/
+
+# logs
+*.log
+*.log.*
+music-booking-system/*.log
+
+# docker files not for this push
+docker/
+docker-compose.yml
+.dockerignore
+docs/DOCKER_DEPLOY.md
+
+

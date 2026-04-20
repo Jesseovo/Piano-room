@@ -142,6 +142,7 @@ import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import dayjs from 'dayjs'
 import { reservationApi } from '@/api/reservation'
 import { useAuthStore } from '@/stores/auth'
+import request from '@/utils/request'
 import type { Reservation } from '@/api/types'
 
 // 百度地图API类型声明
@@ -183,22 +184,17 @@ const statusLabelMap: Record<string, string> = {
 
 async function loadTotalHours() {
   try {
-    const res = await reservationApi.listPracticeDuration({
-      userId: authStore.user?.id,
-      pageNum: 1,
-      pageSize: 9999,
-    })
-    if (res?.code === 1) {
-      const rows = res.data?.rows || []
-      let mins = 0
-      rows.forEach((item: Record<string, unknown>) => {
-        if (item.signStartTime && item.signEndTime) {
-          mins += dayjs(item.signEndTime as string).diff(dayjs(item.signStartTime as string), 'minute')
-        }
-      })
-      totalMinutes.value = mins
+    if (!authStore.user?.id) {
+      totalMinutes.value = 0
+      return
     }
-  } catch {}
+    const res = await request.get(`/user/${authStore.user.id}/reservation-stats`)
+    if (res?.code === 1) {
+      totalMinutes.value = Number(res.data?.totalPracticeMinutes ?? 0)
+    }
+  } catch {
+    totalMinutes.value = 0
+  }
 }
 
 async function loadData() {
@@ -419,8 +415,52 @@ onMounted(() => { loadData(); loadTotalHours() })
 
 @media (max-width: 768px) {
   .container { padding: 0 12px; }
-  .stats-banner { padding: 16px 20px; }
+  .stats-banner {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    padding: 16px 20px;
+  }
+  .stats-text { min-width: 0; }
+  .stats-divider { display: none; }
   .status-filter { width: 100%; overflow-x: auto; }
+  .status-filter :deep(.el-radio-group) {
+    display: inline-flex;
+    min-width: max-content;
+  }
   .list-header { flex-direction: column; align-items: flex-start; }
+  .res-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .res-footer { justify-content: stretch; }
+  .res-footer :deep(.el-button) {
+    flex: 1 1 calc(50% - 8px);
+    margin-left: 0;
+  }
+  .pagination {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .pagination :deep(.el-pagination) {
+    flex-wrap: nowrap;
+    min-width: max-content;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-banner {
+    padding: 16px;
+  }
+
+  .stats-num {
+    font-size: 28px;
+  }
+
+  .res-body {
+    gap: 10px;
+  }
 }
 </style>

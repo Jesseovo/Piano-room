@@ -33,6 +33,10 @@ export interface PenaltyRule {
   description: string
 }
 
+export interface PublicSecuritySettings {
+  publicRegistrationEnabled: boolean
+}
+
 export const useSettingsStore = defineStore('settings', () => {
   const basicSettings = ref<BasicSettings | null>(
     localStorage.getItem('basicSettings')
@@ -52,6 +56,12 @@ export const useSettingsStore = defineStore('settings', () => {
       : []
   )
 
+  const publicSecurity = ref<PublicSecuritySettings | null>(
+    localStorage.getItem('publicSecurity')
+      ? JSON.parse(localStorage.getItem('publicSecurity')!)
+      : null
+  )
+
   function setBasicSettings(settings: BasicSettings) {
     basicSettings.value = settings
     localStorage.setItem('basicSettings', JSON.stringify(settings))
@@ -67,6 +77,11 @@ export const useSettingsStore = defineStore('settings', () => {
     localStorage.setItem('penaltyRules', JSON.stringify(rules))
   }
 
+  function setPublicSecurity(settings: PublicSecuritySettings) {
+    publicSecurity.value = settings
+    localStorage.setItem('publicSecurity', JSON.stringify(settings))
+  }
+
   return {
     basicSettings,
     setBasicSettings,
@@ -74,5 +89,7 @@ export const useSettingsStore = defineStore('settings', () => {
     setReservationSettings,
     penaltyRules,
     setPenaltyRules,
+    publicSecurity,
+    setPublicSecurity,
   }
 })

@@ -2,6 +2,7 @@ package com.bookingsystem.mapper;
 
 import com.bookingsystem.pojo.SystemConfig;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
@@ -28,4 +29,6 @@ public interface SystemConfigMapper {
 
 
      void add(SystemConfig systemConfig);
+
+     SystemConfig selectBySystemName(@Param("systemName") String systemName);
 }

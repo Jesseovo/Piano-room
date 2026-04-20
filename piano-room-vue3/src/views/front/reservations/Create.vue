@@ -436,4 +436,56 @@ onMounted(() => {
   font-size: 14px;
   line-height: 1.4;
 }
+
+@media (max-width: 768px) {
+  .card-head {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .room-tag {
+    margin-left: 0;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .form-actions :deep(.el-button),
+  .submit-btn {
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+  }
+
+  .reserve-form :deep(.el-radio-group) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .reserve-form :deep(.el-radio-button) {
+    flex: 1 1 calc(50% - 8px);
+  }
+
+  .room-info-banner {
+    padding: 16px;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .reserve-form :deep(.el-radio-button) {
+    flex-basis: 100%;
+  }
+
+  .room-info-banner {
+    flex-direction: column;
+  }
+
+  .detail-row {
+    align-items: flex-start;
+  }
+}
 </style>

@@ -62,6 +62,10 @@ public class User {
      */
     private Integer status;
     /**
+     * token版本号，用于密码重置后的旧令牌失效
+     */
+    private Integer tokenVersion;
+    /**
      * 最后登录时间
      */
     private LocalDateTime lastLoginTime;

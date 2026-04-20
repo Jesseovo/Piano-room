@@ -15,11 +15,14 @@ import java.util.List;
 public interface UserMapper {
     List<UserQueryVo> list(UserQueryDTO userQueryDTO);
 
-    @Select("select id,username,password, real_name, student_id, email, phone, grade, major, user_type, avatar_url, status, violation_count, ban_until, last_login_time, last_login_ip, created_at, updated_at from users where id = #{id}")
+    @Select("select id,username,password, real_name, student_id, email, phone, grade, major, user_type, avatar_url, status, token_version, violation_count, ban_until, last_login_time, last_login_ip, created_at, updated_at from users where id = #{id}")
     User getById(Long id);
 
-    @Update("update users set password = #{newPassword} where id = #{id}")
-    void resetPassword(Long id,String newPassword);
+    @Update("update users set password = #{newPassword}, token_version = token_version + 1, updated_at = now() where id = #{id}")
+    void resetPassword(@Param("id") Long id, @Param("newPassword") String newPassword);
+
+    @Update("update users set password = #{newPassword}, token_version = token_version + 1, updated_at = now() where id = #{id}")
+    void migratePassword(@Param("id") Long id, @Param("newPassword") String newPassword);
 
     void delete(Long[] ids);
 

@@ -3,6 +3,7 @@ package com.bookingsystem.utils;
 import com.alibaba.fastjson2.JSON;
 import com.bookingsystem.config.InMemoryDataStore;
 import com.bookingsystem.pojo.SecuritySetting;
+import com.bookingsystem.pojo.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -10,6 +11,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import java.security.Key;
 import java.util.Date;
@@ -20,7 +22,11 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret:defaultSecretKeyWhichShouldBeVeryLongForSecurity}")
+    private static final String CLAIM_USER_ID = "userId";
+    private static final String CLAIM_ROLE = "role";
+    private static final String CLAIM_TOKEN_VERSION = "tokenVersion";
+
+    @Value("${jwt.secret}")
     private String secret;
 
     @Autowired
@@ -28,6 +34,8 @@ public class JwtUtil {
 
     // 生成密钥
     private Key getSigningKey() {
+        Assert.hasText(secret, "JWT_SECRET 未配置，应用无法安全启动");
+        Assert.isTrue(secret.length() >= 32, "JWT_SECRET 长度至少需要 32 个字符");
         byte[] keyBytes = secret.getBytes();
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -35,6 +43,20 @@ public class JwtUtil {
     // 从token中提取用户名
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public Long extractUserId(String token) {
+        Number value = extractClaim(token, claims -> claims.get(CLAIM_USER_ID, Number.class));
+        return value == null ? null : value.longValue();
+    }
+
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get(CLAIM_ROLE, String.class));
+    }
+
+    public Integer extractTokenVersion(String token) {
+        Number value = extractClaim(token, claims -> claims.get(CLAIM_TOKEN_VERSION, Number.class));
+        return value == null ? 0 : value.intValue();
     }
 
     // 从token中提取过期时间
@@ -63,9 +85,12 @@ public class JwtUtil {
     }
 
     // 生成token
-    public String generateToken(String username) {
+    public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
+        claims.put(CLAIM_USER_ID, user.getId());
+        claims.put(CLAIM_ROLE, user.getUserType());
+        claims.put(CLAIM_TOKEN_VERSION, user.getTokenVersion() == null ? 0 : user.getTokenVersion());
+        return createToken(claims, user.getUsername());
     }
 
     /**
@@ -99,8 +124,18 @@ public class JwtUtil {
     }
 
     // 验证token
-    public Boolean validateToken(String token, String username) {
+    public Boolean validateToken(String token, User user) {
         final String extractedUsername = extractUsername(token);
-        return (extractedUsername.equals(username) && !isTokenExpired(token));
+        final Long extractedUserId = extractUserId(token);
+        final String extractedRole = extractRole(token);
+        final Integer extractedTokenVersion = extractTokenVersion(token);
+        Integer currentTokenVersion = user.getTokenVersion() == null ? 0 : user.getTokenVersion();
+        return extractedUsername.equals(user.getUsername())
+                && extractedUserId != null
+                && extractedUserId.equals(user.getId())
+                && extractedRole != null
+                && extractedRole.equals(user.getUserType())
+                && currentTokenVersion.equals(extractedTokenVersion)
+                && !isTokenExpired(token);
     }
 }
